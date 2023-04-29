@@ -158,7 +158,7 @@ export default function DataSourceGenerator() {
         <Page>
             <Card>
                 <center><Text type={"h1"}>ExamResultViewer - DataSourceGenerator</Text></center>
-                <center><Text>学业水平质量测试结果分析器 - 数据源生成器</Text></center>
+                <center><Text>学业水平质量测试结果分析器 - 数据源文件生成器</Text></center>
                 <Text type={"h2"}>一、选择表格文件与工作表</Text>
                 <NextLine/>
                 <input type={"file"} id={"excel_file_input"} onChange={(e) => {
@@ -234,10 +234,16 @@ export default function DataSourceGenerator() {
                         stop_generate();
                     }} id={"generate_button"} loading={loading}>生成数据源文件</Button>
                     <Button type={"primary"} disabled={disabled} id={"download_button"}
-                            href={file_url} download={file_name}>下载数据源文件</Button>
+                            href={file_url} download={file_name}>保存数据源文件</Button>
                 </Space>
                 <NextLine/>
                 <Input.TextArea disabled={true} id={"log_area"} style={{"height": "100px"}} value={log_content}/>
+                <NextLine/>
+                <Text type={"h2"}>五、分析数据源文件</Text>
+                <NextLine/>
+                <Text>数据源文件生成后，您可以分析它。</Text>
+                <NextLine/>
+                <Button type={"primary"} href={"/analyze"}>分析数据源文件</Button>
             </Card>
         </Page>
     </>);

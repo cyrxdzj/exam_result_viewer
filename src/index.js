@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import DataSourceGenerator from "./DataSourceGenerator";
+import DataSourceAnalyzer from "./DataSourceAnalyzer";
 import reportWebVitals from './reportWebVitals';
 import {createBrowserRouter, RouterProvider} from "react-router-dom";
 
@@ -17,6 +18,10 @@ root.render(
             {
                 "path":"/generate",
                 element:<DataSourceGenerator/>
+            },
+            {
+                "path":"/analyze",
+                element:<DataSourceAnalyzer/>
             }
         ]
     )}/>
