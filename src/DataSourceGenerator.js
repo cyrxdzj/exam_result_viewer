@@ -122,8 +122,6 @@ export default function DataSourceGenerator() {
         key: 'operation',
         render: (_, record) => subject_data_source.length >= 1 ? (<Space>
             <Button type={"text"} danger={true} onClick={() => delete_row(record.key)}>删除</Button>
-            <Button type={"text"}>上移</Button>
-            <Button type={"text"}>下移</Button>
         </Space>) : null,
     }];
 
@@ -246,7 +244,6 @@ export default function DataSourceGenerator() {
 
     function delete_row(key) {
         const new_data = subject_data_source.filter((item) => item.key !== key);
-        console.log(subject_data_source.length, new_data.length);
         set_subject_data_source(new_data);
         console.log(new_data);
     }
@@ -264,7 +261,7 @@ export default function DataSourceGenerator() {
         set_data_source_cnt(data_source_cnt + 1);
         subject_data_source = [...subject_data_source, new_data];
         data_source_cnt = data_source_cnt + 1;
-        //console.log(new_data);
+        console.log(subject_data_source);
     }
 
     function generate_data_source() {
