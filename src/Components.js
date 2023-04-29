@@ -35,14 +35,15 @@ export function Page({children}) {
             "key": "antd",
             "name": <Text>Ant Design</Text>,
             "usage": <Text>页面组件设计，如按钮、输入框等。</Text>,
-            "url": <a href={"https://ant.design"} target={"_blank"}><Text>https://ant.design</Text></a>
+            "url": <a href={"https://ant.design"} target={"_blank"}
+                      rel={"noreferrer"}><Text>https://ant.design</Text></a>
         },
         {
             "key": "lxgw",
             "name": <Text>霞鹜文楷</Text>,
             "usage": <Text>页面字体。</Text>,
             "url": <a href={"https://github.com/lxgw/LxgwWenKai"}
-                      target={"_blank"}><Text>https://github.com/lxgw/LxgwWenKai</Text></a>
+                      target={"_blank"} rel={"noreferrer"}><Text>https://github.com/lxgw/LxgwWenKai</Text></a>
         }
     ];
     const columns = [

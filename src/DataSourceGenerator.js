@@ -67,10 +67,47 @@ let all_data = null;
 let workbook_content = null;
 const re_letter = /^[A-Z]+$/;//判断是否均为大写字母的正则表达式
 const re_float = /^[0-9.]+$/;//判断是否均为数字的正则表达式
+
+
 export default function DataSourceGenerator() {
     const [notification_api, context_holder] = notification.useNotification();
     let [subject_data_source, set_subject_data_source] = useState([]);
     let [data_source_cnt, set_data_source_cnt] = useState(0);
+    let [loading, set_loading] = useState(false);
+    let [disabled, set_disabled] = useState(true);
+    let [log_content, set_log_content] = useState("");
+    let [file_url, set_file_url] = useState("#");
+    let [file_name, set_file_name] = useState("");
+
+    function add_log(content, flag = "add") {
+        let new_content = "";
+        if (flag === "add") {
+            new_content = log_content + content;
+        } else if (flag === "clear") {
+            new_content = content;
+        } else if (flag === "del_line") {
+            let temp = "";
+            let lines = log_content.split("\n");
+            for (var i = 0; i < lines.length - 2; i++) {
+                temp += lines[i] + "\n";
+            }
+            temp += content;
+            new_content = temp;
+        }
+        set_log_content(new_content);
+        log_content = new_content;
+    }
+
+    function start_generate() {
+        set_loading(true);
+        set_disabled(true);
+    }
+
+    function stop_generate() {
+        set_loading(false);
+        set_disabled(all_data === null);
+    }
+
     const default_columns = [{
         title: <Text bold={true}>科目名称</Text>, dataIndex: 'subject_name', key: 'subject_name',
     }, {
@@ -158,6 +195,9 @@ export default function DataSourceGenerator() {
                 <NextLine/>
                 <Input addonBefore={"工作表名"} id={"worktable_name_input"}/>
                 <NextLine/>
+                <Input addonBefore={"数据源名"} id={"data_src_name_input"}
+                       placeholder={"如：2020-2022届九年级下学期一模，应尽可能详细。"}/>
+                <NextLine/>
                 <Text type={"h2"}>二、选择数据范围与来源</Text>
                 <NextLine/>
                 <Space>
@@ -190,11 +230,16 @@ export default function DataSourceGenerator() {
                 <Text type={"h2"}>四、生成数据源文件</Text>
                 <NextLine/>
                 <Space>
-                    <Button type={"primary"} onClick={generate_data_source}>生成数据源文件</Button>
-                    <Button type={"primary"} disabled={true}>下载数据源文件</Button>
+                    <Button type={"primary"} onClick={() => {
+                        start_generate();
+                        generate_data_source();
+                        stop_generate();
+                    }} id={"generate_button"} loading={loading}>生成数据源文件</Button>
+                    <Button type={"primary"} disabled={disabled} id={"download_button"}
+                            href={file_url} download={file_name}>下载数据源文件</Button>
                 </Space>
                 <NextLine/>
-                <Input.TextArea disabled={true}/>
+                <Input.TextArea disabled={true} id={"log_area"} style={{"height": "100px"}} value={log_content}/>
             </Card>
         </Page>
     </>);
@@ -223,9 +268,12 @@ export default function DataSourceGenerator() {
     }
 
     function generate_data_source() {
+        add_log("开始生成数据源文件。\n", "clear");
+        console.log(log_content);
         try {
             let subject_list = get_subjects();
             const worktable_name = document.getElementById("worktable_name_input").value;
+            const data_src_name = document.getElementById("data_src_name_input").value;
             let from_line = document.getElementById("from_line_input").value;
             let to_line = document.getElementById("to_line_input").value;
             let name_col_id = document.getElementById("name_col_id").value.toUpperCase();
@@ -235,24 +283,35 @@ export default function DataSourceGenerator() {
                 notification_api["error"]({
                     "message": "未选择有效的文件", "description": "您似乎没有选择有效的Excel文件。"
                 });
+                add_log("生成结束。未能成功生成数据源文件。\n");
                 return;
             }
             if (worktable_name === "") {
                 notification_api["error"]({
                     "message": "未填写工作表名", "description": "请填写数据所在的工作表名。"
                 });
+                add_log("生成结束。未能成功生成数据源文件。\n");
+                return;
+            }
+            if (data_src_name === "") {
+                notification_api["error"]({
+                    "message": "未填写数据源名", "description": "请填写数据源名。"
+                });
+                add_log("生成结束。未能成功生成数据源文件。\n");
                 return;
             }
             if (workbook_content.SheetNames.indexOf(worktable_name) === -1) {
                 notification_api["error"]({
                     "message": "工作表名无效", "description": "在Excel文件里找不到这个工作表。"
                 });
+                add_log("生成结束。未能成功生成数据源文件。\n");
                 return;
             }
             if (from_line === "" || to_line === "") {
                 notification_api["error"]({
                     "message": "数据无效", "description": "起止行数无效。"
                 });
+                add_log("生成结束。未能成功生成数据源文件。\n");
                 return;
             }
             from_line = parseFloat(from_line);
@@ -261,6 +320,7 @@ export default function DataSourceGenerator() {
                 notification_api["error"]({
                     "message": "数据无效", "description": "起止行数无效。"
                 });
+                add_log("生成结束。未能成功生成数据源文件。\n");
                 return;
             }
             from_line = parseInt(from_line);
@@ -269,44 +329,62 @@ export default function DataSourceGenerator() {
                 notification_api["error"]({
                     "message": "数据无效", "description": "关键数据列号无效。"
                 });
+                add_log("生成结束。未能成功生成数据源文件。\n");
                 return;
             }
             if (!check_subjects(subject_list)) {
+                add_log("生成结束。未能成功生成数据源文件。\n");
                 return;
             }
             let worktable_content = workbook_content.Sheets[worktable_name];
             console.log(worktable_content);
             let student_list = [];
+            add_log("\n");
             for (var now_row = from_line; now_row <= to_line; now_row++) {
+                add_log(`正在生成，第${now_row - from_line + 1}行，共${to_line - now_row + 1}行。\n`, "del_line");
                 let score = [];
+                let now_student = {
+                    "name": worktable_content[name_col_id + now_row.toString()].w,
+                    "id": worktable_content[id_col_id + now_row.toString()].w,
+                    "class": worktable_content[class_col_id + now_row.toString()].w,
+                    "score": null
+                };
                 for (var i in subject_list) {
                     let now_subject = subject_list[i];
                     var data = worktable_content[now_subject["col_id"] + now_row.toString()].w;
                     if (!re_float.test(data)) {
+                        add_log(`考生姓名${now_student.name}，考号${now_student.id}，科目${now_subject.subject_name}，成绩无效。原数据：${data}\n\n`, "del_line");
                         data = -1;
+                    } else if (parseFloat(data) > now_subject.full_score) {
+                        add_log(`考生姓名${now_student.name}，考号${now_student.id}，科目${now_subject.subject_name}，成绩无效。原数据：${data}\n\n`, "del_line");
+                        data = -1
                     } else {
                         data = parseFloat(data);
                     }
                     score.push(data);
                 }
-                let now_student = {
-                    "name": worktable_content[name_col_id + now_row.toString()].w,
-                    "id": worktable_content[id_col_id + now_row.toString()].w,
-                    "class": worktable_content[class_col_id + now_row.toString()].w,
-                    "score": score
-                };
+                now_student.score = score;
                 student_list.push(now_student);
             }
             all_data = {
-                "subject": subject_list,
-                "student": student_list
+                "name": data_src_name, "subject": subject_list, "student": student_list
             };
+            add_log("生成完毕。", "del_line");
             console.log(all_data);
+            file_name = `${all_data.name}.ervds`;
+            var file = new File([JSON.stringify(all_data)], file_name);
+            file_url = URL.createObjectURL(file);
+            set_file_name(file_name)
+            set_file_url(file_url);
+            console.log(file_name);
+            console.log(file_url);
+
         } catch (e) {
             console.log(e);
             notification_api["error"]({
                 "message": "生成数据源时出错", "discription": e.toString()
-            })
+            });
+            add_log("生成数据源时出错。", "del_line");
         }
     }
 
@@ -314,13 +392,14 @@ export default function DataSourceGenerator() {
         let subject_list = [];
         console.log(subject_data_source);
         for (var now_subject in subject_data_source) {
+            console.log("subject_name_input_" + now_subject.toString());
             let subject_name = document.getElementById("subject_name_input_" + now_subject.toString()).value;
             let full_score = parseFloat(document.getElementById("full_score_input_" + now_subject.toString()).value);
             let is_counted = document.getElementById("is_counted_switch_" + now_subject.toString()).ariaChecked;
             let col_id = document.getElementById("col_id_input_" + now_subject.toString()).value.toUpperCase();
             subject_list.push({
                 "subject_name": subject_name, "full_score": full_score, "is_counted": is_counted, "col_id": col_id
-            })
+            });
             //console.log(document.getElementById("subject_name_input_" +now_subject.toString()).value);
         }
         console.log(subject_list);
