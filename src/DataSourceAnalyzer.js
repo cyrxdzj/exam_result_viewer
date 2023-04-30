@@ -83,27 +83,22 @@ export default function DataSourceAnalyzer() {
         }
         return res;
     }
-    function get_rank(data,data_list)
-    {
-        var left=0,right=data_list.length-1;
-        var ans=-2;
-        while(left<=right)
-        {
-            var mid=(left+right)/2;
-            if(data_list[mid]==data)
-            {
-                ans=mid;
+
+    function get_rank(data, data_list) {
+        var left = 0, right = data_list.length - 1;
+        var ans = -2;
+        while (left <= right) {
+            var mid = (left + right) / 2;
+            if (data_list[mid] == data) {
+                ans = mid;
             }
-            if(data_list[mid]>=data)
-            {
-                left=mid+1;
-            }
-            else
-            {
-                right=mid-1;
+            if (data_list[mid] >= data) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
             }
         }
-        return ans+1;
+        return ans + 1;
     }
 
     function analyze_data() {
@@ -150,9 +145,11 @@ export default function DataSourceAnalyzer() {
                     </Text>
                 </Tooltip>)
         }];
+        let subject_scores = [];//每一科的所有分数，用于计算排名。
         var overview_table_data = [];
         let full_score = 0;
         for (var subject_id in data_source_content.subject) {
+            subject_scores.push([]);
             if (data_source_content.subject[subject_id].is_counted === "true") {
                 full_score += data_source_content.subject[subject_id].full_score;
             }
@@ -164,6 +161,7 @@ export default function DataSourceAnalyzer() {
                 var score = data_source_content.student[student_id].score[subject_id];
                 if (score !== -1) {
                     valid_cnt++;
+                    subject_scores[subject_id].push(score);
                     sum_score += score;
                     if (score > max_score) {
                         max_score = score;
@@ -181,6 +179,9 @@ export default function DataSourceAnalyzer() {
                     }
                 }
             }
+            subject_scores[subject_id] = subject_scores[subject_id].sort(function (a, b) {
+                return b - a;
+            });
             let new_data = null;
             if (valid_cnt === 0) {
                 new_data = {
@@ -208,6 +209,7 @@ export default function DataSourceAnalyzer() {
         }
         //计算总分
         {
+            subject_scores.push([]);
             let valid_cnt = 0, sum_score = 0;
             let max_score = -1, min_score = 0x3fffffff;
             let max_score_who = [], min_score_who = [];
@@ -223,6 +225,7 @@ export default function DataSourceAnalyzer() {
                 }
                 if (valid) {
                     valid_cnt++;
+                    subject_scores[subject_scores.length - 1].push(score);
                     sum_score += score;
                     if (score > max_score) {
                         max_score = score;
@@ -240,6 +243,9 @@ export default function DataSourceAnalyzer() {
                     }
                 }
             }
+            subject_scores[subject_scores.length - 1] = subject_scores[subject_scores.length - 1].sort(function (a, b) {
+                return b - a;
+            });
             let new_data = null;
             if (valid_cnt === 0) {
                 new_data = {
@@ -274,43 +280,56 @@ export default function DataSourceAnalyzer() {
             </>);
         //计算个人成绩
         let personal_list_data = [];
-        let subject_scores = [];//每一科的所有分数，用于计算排名。
-        for (var i in data_source_content.subject) {
-            let now_subject_scores = [];
-            for (var j in data_source_content.student) {
-                var score = data_source_content.student[j].score[i];
-                if (score !== -1) {
-                    now_subject_scores.push(score);
+        for (var i in data_source_content.student) {
+            var now_student = data_source_content.student[i];
+            let now_personal_data = {};
+            now_personal_data["name"] = now_student.name;
+            now_personal_data["id"] = now_student.id;
+            now_personal_data["class"] = now_student["class"];
+            now_personal_data["subject"] = [];
+            for (var j in data_source_content.subject) {
+                now_personal_data["subject"].push({
+                    "name": data_source_content.subject[j].subject_name,
+                    "full_score": data_source_content.subject[j].full_score,
+                    "score": now_student.score[j],
+                    "rank": get_rank(now_student.score[j], subject_scores[j]),
+                    "valid_cnt": subject_scores[j].length
+                });
+            }
+            //计算总分
+            let score = 0, valid = false;
+            for (var j in now_student.score) {
+                let data = now_student.score[j];
+                if (data !== -1 && data_source_content.subject[j].is_counted === "true") {
+                    score += data;
+                    valid = true;
                 }
             }
-            now_subject_scores = now_subject_scores.sort(function (a, b) {
-                return b - a;
-            });
-            subject_scores.push(now_subject_scores);
-        }
-        //console.log(subject_scores);
-        for (var i in data_source_content.student) {
-            var now_student=data_source_content.student[i];
-            let now_personal_data={};
-            now_personal_data["name"]=now_student.name;
-            now_personal_data["id"]=now_student.id;
-            now_personal_data["class"]=now_student["class"];
-            now_personal_data["subject"]=[];
-            for(var j in data_source_content.subject)
-            {
+            if (valid) {
                 now_personal_data["subject"].push({
-                    "name":data_source_content.subject[j].subject_name,
-                    "full_score":data_source_content.subject[j].full_score,
-                    "score":now_student.score[j],
-                    "rank":get_rank(now_student.score[j],subject_scores[j]),
-                    "valid_cnt":subject_scores[j].length
-                });
+                        "name": "总分",
+                        "full_score": full_score,
+                        "score": score,
+                        "rank": get_rank(score, subject_scores[subject_scores.length - 1]),
+                        "valid_cnt": subject_scores[subject_scores.length - 1].length
+                    }
+                )
+            }
+            else {
+                now_personal_data["subject"].push({
+                        "name": "总分",
+                        "full_score": full_score,
+                        "score": -1,
+                        "rank": get_rank(score, subject_scores[subject_scores.length - 1]),
+                        "valid_cnt": subject_scores[subject_scores.length - 1].length
+                    }
+                )
             }
             personal_list_data.push(now_personal_data);
         }
         console.log(personal_list_data);
         set_data_personal(
-            <List grid={{gutter:4,column:4}} dataSource={personal_list_data} renderItem={(item)=>(
+            <List grid={{gutter: 16, column: 4}} dataSource={personal_list_data} renderItem={(item) => (
                 <List.Item>
                     <PersonalResult data={item}/>
                 </List.Item>
