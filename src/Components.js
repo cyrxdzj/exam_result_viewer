@@ -71,7 +71,7 @@ export function NextLine({size = "8px"}) {
 }
 
 export function PersonalResult(props) {
-    var test_data = {
+    /*var test_data = {
         "name": "Deng Zijun",
         "id": "0118030007",
         "class": "7",
@@ -84,7 +84,7 @@ export function PersonalResult(props) {
                 "valid_cnt": 7,
             }
         ]
-    }
+    }*/
     const table_column = [
         {
             "title": <Text>科目名称</Text>,

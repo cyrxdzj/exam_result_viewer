@@ -17,7 +17,7 @@ export default function App() {
                 <NextLine/>
                 <Text>配置好数据源文件后，您可以将其导入这里以进行分析。</Text>
                 <NextLine/>
-                <Button type={"primary"}>开始分析</Button>
+                <Button type={"primary"} href={"/analyze"}>开始分析</Button>
                 <NextLine/>
             </Card>
         </Page>

@@ -12,6 +12,7 @@ export default function DataSourceAnalyzer() {
         {context_holder}
         <Page>
             <Card>
+                <Button href={"/"} type={"primary"} ghost={true}><Text>回到主页</Text></Button>
                 <center><Text type={"h1"}>ExamResultViewer - DataSourceAnalyzer</Text></center>
                 <center><Text>学业水平质量测试结果分析器 - 数据源文件分析器</Text></center>
                 <Text type={"h2"}>选择数据源文件</Text>
@@ -58,6 +59,8 @@ export default function DataSourceAnalyzer() {
                 {data_overview}
                 <NextLine/>
                 <Text type={"h2"}>个人数据</Text>
+                <NextLine/>
+                <Text>可以在浏览器中使用Ctrl+F快捷键查找页面内容。筛选和排序啥的……之后再搞。</Text>
                 <NextLine/>
                 {data_personal}
             </Card>
@@ -288,7 +291,7 @@ export default function DataSourceAnalyzer() {
             now_personal_data["id"] = now_student.id;
             now_personal_data["class"] = now_student["class"];
             now_personal_data["subject"] = [];
-            for (var j in data_source_content.subject) {
+            for (j in data_source_content.subject) {
                 now_personal_data["subject"].push({
                     "name": data_source_content.subject[j].subject_name,
                     "full_score": data_source_content.subject[j].full_score,
@@ -299,7 +302,7 @@ export default function DataSourceAnalyzer() {
             }
             //计算总分
             let score = 0, valid = false;
-            for (var j in now_student.score) {
+            for (j in now_student.score) {
                 let data = now_student.score[j];
                 if (data !== -1 && data_source_content.subject[j].is_counted === "true") {
                     score += data;
