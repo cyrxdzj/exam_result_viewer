@@ -1,4 +1,5 @@
 import {Table} from "antd";
+import React from "react";
 
 const text_size = {
     "normal": "16px", "h4": "20px", "h3": "24px", "h2": "32px", "h1": "40px"
@@ -57,22 +58,71 @@ export function Page({children}) {
     </Background>);
 }
 
-export function Text({
-                         children,
-                         type = "normal",
-                         bold = false,
-                         onMouseEnter = null,
-                         onMouseLeave = null,
-                         onClick = null,
-                         onFocus = null
-                     }) {
-    return (<span onMouseEnter={onMouseEnter} onMouseLeave={onMouseLeave} onClick={onClick} onFocus={onFocus} style={{
-        "fontSize": text_size[type],
+export function Text(props) {
+    return (<span style={{
+        "fontSize": text_size[props.type],
         "fontFamily": "霞鹜文楷",
-        "fontWeight": (type.startsWith("h") || bold) ? "bold" : "normal"
-    }}>{children}</span>);
+        "fontWeight": ((props.type !== undefined && props.type.startsWith("h")) || props.bold) ? "bold" : "normal",
+    }} {...props}>{props.children}</span>);
 }
 
 export function NextLine({size = "8px"}) {
     return (<div style={{"display": "block", "height": size}}/>);
+}
+
+export function PersonalResult(props) {
+    var test_data = {
+        "name": "Deng Zijun",
+        "id": "0118030007",
+        "class": "7",
+        "subject": [
+            {
+                "name": "语文",
+                "score": 105,
+                "full_score": 120,
+                "rank": 1,
+                "valid_cnt": 7,
+            }
+        ]
+    }
+    const table_column = [
+        {
+            "title": <Text>科目名称</Text>,
+            "key": "name",
+            "dataIndex": "name",
+            render: (_, record) => (<Text>{record.name}</Text>)
+        },
+        {
+            "title": <Text>得分</Text>,
+            "key": "score",
+            "dataIndex": "score",
+            render: (_, record) => (record.score === -1) ? (<Text>无效</Text>) : (
+                <Text>{JSON.stringify(record.score)}</Text>)
+        },
+        {
+            "title": <Text>满分</Text>,
+            "key": "full_score",
+            "dataIndex": "full_score",
+            render: (_, record) => (<Text>{JSON.stringify(record.full_score)}</Text>)
+        },
+        {
+            "title": <Text>数据内排名</Text>,
+            "key": "rank",
+            "dataIndex": "rank",
+            render: (_, record) => (record.score === -1) ? (<Text>无效</Text>) : (
+                <Text>{`${JSON.stringify(record.rank)}/${JSON.stringify(record.valid_cnt)}`}</Text>)
+        }
+    ]
+    const data_source = props.data.subject;
+    return (
+        <Card>
+            <Text type={"h3"}>{props.data.name}</Text>
+            <NextLine size={"0px"}/>
+            <Text>考号：{props.data["id"]}</Text>
+            <NextLine size={"0px"}/>
+            <Text>班级：{props.data["class"]}</Text>
+            <NextLine size={"0px"}/>
+            <Table columns={table_column} dataSource={data_source} pagination={false} className={"table-row"} size={"small"}/>
+        </Card>
+    )
 }

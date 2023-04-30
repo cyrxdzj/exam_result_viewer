@@ -1,11 +1,13 @@
-import {Card, NextLine, Page, Text} from "./Components";
+import {Card, NextLine, Page, PersonalResult, Text} from "./Components";
 import React, {Fragment, useState} from "react";
-import {Button, notification, Table, Tooltip} from "antd";
+import {Button, List, notification, Table, Tooltip} from "antd";
 
 let data_source_content = null;
 export default function DataSourceAnalyzer() {
     const [notification_api, context_holder] = notification.useNotification();
     let [data_overview, set_data_overview] = useState(<Fragment/>);
+    let [data_personal, set_data_personal] = useState(<Fragment/>);
+    let [loading, set_loading] = useState(false);
     return (<>
         {context_holder}
         <Page>
@@ -43,7 +45,11 @@ export default function DataSourceAnalyzer() {
                     }
                 }}/>
                 <NextLine/>
-                <Button type={"primary"} onClick={analyze_data}>开始分析</Button>
+                <Button type={"primary"} onClick={() => {
+                    start_loading();
+                    analyze_data();
+                    stop_loading();
+                }} loading={loading}>开始分析</Button>
             </Card>
             <NextLine size={"30px"}/>
             <Card>
@@ -52,9 +58,19 @@ export default function DataSourceAnalyzer() {
                 {data_overview}
                 <NextLine/>
                 <Text type={"h2"}>个人数据</Text>
+                <NextLine/>
+                {data_personal}
             </Card>
         </Page>
     </>)
+
+    function start_loading() {
+        set_loading(true);
+    }
+
+    function stop_loading() {
+        set_loading(false);
+    }
 
     function join_student_info(name, id, stu_class) {
         return `${name}-${id}-${stu_class}`;
@@ -62,12 +78,32 @@ export default function DataSourceAnalyzer() {
 
     function render_student_list_in_tooltip(student_list) {
         let res = "";
-        console.log(student_list);
         for (var i in student_list) {
             res += student_list[i] + ((parseInt(i) === (student_list.length - 1)) ? "。" : "，");
         }
-        console.log(res);
         return res;
+    }
+    function get_rank(data,data_list)
+    {
+        var left=0,right=data_list.length-1;
+        var ans=-2;
+        while(left<=right)
+        {
+            var mid=(left+right)/2;
+            if(data_list[mid]==data)
+            {
+                ans=mid;
+            }
+            if(data_list[mid]>=data)
+            {
+                left=mid+1;
+            }
+            else
+            {
+                right=mid-1;
+            }
+        }
+        return ans+1;
     }
 
     function analyze_data() {
@@ -91,13 +127,13 @@ export default function DataSourceAnalyzer() {
             "title": <Text bold={true}>平均分</Text>,
             "dataIndex": "average_score",
             "key": "average_score",
-            render: (_, record) => record === -1 ? (<Text>无有效数据</Text>) : (
+            render: (_, record) => record.valid_cnt === 0 ? (<Text>无有效数据</Text>) : (
                 <Text>{JSON.stringify(record.average_score)}</Text>)
         }, {
             "title": <Text bold={true}>最高分</Text>,
             "dataIndex": "max_score",
             "key": "max_score",
-            render: (_, record) => record.max_score === -1 ? (<Text>无有效数据</Text>) : (
+            render: (_, record) => record.valid_cnt === 0 ? (<Text>无有效数据</Text>) : (
                 <Tooltip title={render_student_list_in_tooltip(record.max_score_who)}>
                     <Text>
                         {JSON.stringify(record.max_score)}
@@ -107,7 +143,7 @@ export default function DataSourceAnalyzer() {
             "title": <Text bold={true}>最低分</Text>,
             "dataIndex": "min_score",
             "key": "min_score",
-            render: (_, record) => record.min_score === -1 ? (<Text>无有效数据</Text>) : (
+            render: (_, record) => record.valid_cnt === 0 ? (<Text>无有效数据</Text>) : (
                 <Tooltip title={render_student_list_in_tooltip(record.min_score_who)}>
                     <Text>
                         {JSON.stringify(record.min_score)}
@@ -167,7 +203,7 @@ export default function DataSourceAnalyzer() {
                     "min_score_who": min_score_who
                 }
             }
-            console.log(new_data);
+            //console.log(new_data);
             overview_table_data.push(new_data);
         }
         //计算总分
@@ -226,15 +262,59 @@ export default function DataSourceAnalyzer() {
                     "min_score_who": min_score_who
                 }
             }
-            console.log(new_data);
+            //console.log(new_data);
             overview_table_data.push(new_data);
         }
-        console.log(overview_table_data);
+        //console.log(overview_table_data);
         set_data_overview(
             <>
                 <Text>共{JSON.stringify(data_source_content.student.length)}条数据。</Text>
                 <NextLine/>
                 <Table columns={overview_table_column} dataSource={overview_table_data} pagination={false}/>
             </>);
+        //计算个人成绩
+        let personal_list_data = [];
+        let subject_scores = [];//每一科的所有分数，用于计算排名。
+        for (var i in data_source_content.subject) {
+            let now_subject_scores = [];
+            for (var j in data_source_content.student) {
+                var score = data_source_content.student[j].score[i];
+                if (score !== -1) {
+                    now_subject_scores.push(score);
+                }
+            }
+            now_subject_scores = now_subject_scores.sort(function (a, b) {
+                return b - a;
+            });
+            subject_scores.push(now_subject_scores);
+        }
+        //console.log(subject_scores);
+        for (var i in data_source_content.student) {
+            var now_student=data_source_content.student[i];
+            let now_personal_data={};
+            now_personal_data["name"]=now_student.name;
+            now_personal_data["id"]=now_student.id;
+            now_personal_data["class"]=now_student["class"];
+            now_personal_data["subject"]=[];
+            for(var j in data_source_content.subject)
+            {
+                now_personal_data["subject"].push({
+                    "name":data_source_content.subject[j].subject_name,
+                    "full_score":data_source_content.subject[j].full_score,
+                    "score":now_student.score[j],
+                    "rank":get_rank(now_student.score[j],subject_scores[j]),
+                    "valid_cnt":subject_scores[j].length
+                });
+            }
+            personal_list_data.push(now_personal_data);
+        }
+        console.log(personal_list_data);
+        set_data_personal(
+            <List grid={{gutter:4,column:4}} dataSource={personal_list_data} renderItem={(item)=>(
+                <List.Item>
+                    <PersonalResult data={item}/>
+                </List.Item>
+            )}/>
+        );
     }
 }
