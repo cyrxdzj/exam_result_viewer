@@ -1,5 +1,6 @@
-import {Table} from "antd";
+import {notification, Table} from "antd";
 import React from "react";
+import domtoimage from "dom-to-image"
 
 const text_size = {
     "normal": "16px", "h4": "20px", "h3": "24px", "h2": "32px", "h1": "40px"
@@ -18,10 +19,10 @@ export function Background({children}) {
     }}>{children}</div>);
 }
 
-export function Card({children}) {
+export function Card(props) {
     return (<div style={{
         "background": "rgba(255,255,255,0.5)", "padding": "30px", "borderRadius": "30px"
-    }}>{children}</div>);
+    }} {...props}>{props.children}</div>);
 }
 
 export function Page({children}) {
@@ -85,6 +86,7 @@ export function PersonalResult(props) {
             }
         ]
     }*/
+    const [notification_api, context_holder] = notification.useNotification();
     const table_column = [
         {
             "title": <Text>科目名称</Text>,
@@ -115,17 +117,54 @@ export function PersonalResult(props) {
     ]
     const data_source = props.data.subject;
     return (
-        <Card>
-            <Text>{props.data.exam_name}</Text>
-            <NextLine size={"0px"}/>
-            <Text type={"h3"}>{props.data.name}</Text>
-            <NextLine size={"0px"}/>
-            <Text>考号：{props.data["id"]}</Text>
-            <NextLine size={"0px"}/>
-            <Text>班级：{props.data["class"]}</Text>
-            <NextLine size={"0px"}/>
-            <Table columns={table_column} dataSource={data_source} pagination={false} className={"table-row"}
-                   size={"small"}/>
-        </Card>
+        <>
+            {context_holder}
+            <Card onDoubleClick={function (e) {
+                console.log(e.target);
+                if (e.target.style.borderRadius != "30px") {
+                    return;
+                }
+                var div_for_image = document.createElement("div");
+                div_for_image.style.width = div_for_image.style.height = "auto";
+                div_for_image.style.padding = "30px";
+                div_for_image.style.position = "fixed";
+                div_for_image.style.background = "linear-gradient(to top, #000088 0%, #330867 100%)";
+                div_for_image.style.zIndex = "-1000";
+                div_for_image.appendChild(e.target.cloneNode(true));
+                document.body.appendChild(div_for_image);
+                domtoimage.toBlob(div_for_image).then((blob) => {
+                    console.log(blob);
+                    navigator.clipboard.write([
+                        new window.ClipboardItem({
+                            [blob.type]: blob,
+                        })
+                    ]).then(() => {
+                        console.log("Copied.");
+                        notification_api["success"]({
+                            "message": "复制成功",
+                            "description": "复制成功。",
+                        })
+                    }, () => {
+                        console.log("Copy error!");
+                        notification_api["error"]({
+                            "message": "复制失败",
+                            "description": "复制失败。",
+                        })
+                    })
+                });
+                //document.body.appendChild(div_for_image);
+            }}>
+                <Text>{props.data.exam_name}</Text>
+                <NextLine size={"0px"}/>
+                <Text type={"h3"}>{props.data.name}</Text>
+                <NextLine size={"0px"}/>
+                <Text>考号：{props.data["id"]}</Text>
+                <NextLine size={"0px"}/>
+                <Text>班级：{props.data["class"]}</Text>
+                <NextLine size={"0px"}/>
+                <Table columns={table_column} dataSource={data_source} pagination={false} className={"table-row"}
+                       size={"small"}/>
+            </Card>
+        </>
     )
 }

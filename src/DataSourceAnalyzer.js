@@ -64,6 +64,8 @@ export default function DataSourceAnalyzer() {
                 <NextLine/>
                 <Text>可以在浏览器中使用Ctrl+F快捷键查找页面内容。筛选和排序啥的……之后再搞。</Text>
                 <NextLine/>
+                <Text>双击卡片<b>空白部分</b>可以复制卡片为图片，复制到剪贴板里的图片可以使用Ctrl+V快捷键粘贴至微信、Word等软件中。<s>可以将其发送给家长，很有纪念意义，不是吗？</s></Text>
+                <NextLine/>
                 {data_personal}
             </Card>
         </Page>
