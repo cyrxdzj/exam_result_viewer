@@ -16,7 +16,7 @@ export default function DataSourceAnalyzer() {
                 <center><Text>学业水平质量测试结果分析器 - 数据源文件分析器</Text></center>
                 <Text type={"h2"}>选择数据源文件</Text>
                 <NextLine/>
-                <input type={"file"} id={"excel_file_input"} onChange={(e) => {
+                <input type={"file"} id={"excel_file_input"} accept={".ervds"} onChange={(e) => {
                     try {
                         console.log(e);
                         var files = e.target.files;
@@ -314,8 +314,7 @@ export default function DataSourceAnalyzer() {
                         "valid_cnt": subject_scores[subject_scores.length - 1].length
                     }
                 )
-            }
-            else {
+            } else {
                 now_personal_data["subject"].push({
                         "name": "总分",
                         "full_score": full_score,

@@ -161,7 +161,7 @@ export default function DataSourceGenerator() {
                 <center><Text>学业水平质量测试结果分析器 - 数据源文件生成器</Text></center>
                 <Text type={"h2"}>一、选择表格文件与工作表</Text>
                 <NextLine/>
-                <input type={"file"} id={"excel_file_input"} onChange={(e) => {
+                <input type={"file"} id={"excel_file_input"} accept={".xls,.xlsx"} onChange={(e) => {
                     try {
                         console.log(e);
                         var files = e.target.files;

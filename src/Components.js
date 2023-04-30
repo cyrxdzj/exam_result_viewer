@@ -122,7 +122,8 @@ export function PersonalResult(props) {
             <NextLine size={"0px"}/>
             <Text>班级：{props.data["class"]}</Text>
             <NextLine size={"0px"}/>
-            <Table columns={table_column} dataSource={data_source} pagination={false} className={"table-row"} size={"small"}/>
+            <Table columns={table_column} dataSource={data_source} pagination={false} className={"table-row"}
+                   size={"small"}/>
         </Card>
     )
 }
