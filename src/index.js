@@ -5,23 +5,24 @@ import App from './App';
 import DataSourceGenerator from "./DataSourceGenerator";
 import DataSourceAnalyzer from "./DataSourceAnalyzer";
 import reportWebVitals from './reportWebVitals';
-import {createBrowserRouter, RouterProvider} from "react-router-dom";
+import {createHashRouter, RouterProvider} from 'react-router-dom' //路由库
+
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-    <RouterProvider router={createBrowserRouter(
+    <RouterProvider router={createHashRouter(
         [
             {
-                "path":"/",
-                element:<App/>
+                "path": "/",
+                element: <App/>
             },
             {
-                "path":"/generate",
-                element:<DataSourceGenerator/>
+                "path": "/generate",
+                element: <DataSourceGenerator/>
             },
             {
-                "path":"/analyze",
-                element:<DataSourceAnalyzer/>
+                "path": "/analyze",
+                element: <DataSourceAnalyzer/>
             }
         ]
     )}/>

@@ -157,7 +157,7 @@ export default function DataSourceGenerator() {
         {context_holder}
         <Page>
             <Card>
-                <Button href={"/"} type={"primary"} ghost={true}><Text>回到主页</Text></Button>
+                <Button href={"/#/"} type={"primary"} ghost={true}><Text>回到主页</Text></Button>
                 <center><Text type={"h1"}>ExamResultViewer - DataSourceGenerator</Text></center>
                 <center><Text>学业水平质量测试结果分析器 - 数据源文件生成器</Text></center>
                 <Text type={"h2"}>一、选择表格文件与工作表</Text>
@@ -244,7 +244,7 @@ export default function DataSourceGenerator() {
                 <NextLine/>
                 <Text>数据源文件生成后，您可以分析它。</Text>
                 <NextLine/>
-                <Button type={"primary"} href={"/analyze"}>分析数据源文件</Button>
+                <Button type={"primary"} href={"/#/analyze"}>分析数据源文件</Button>
             </Card>
         </Page>
     </>);

@@ -12,7 +12,7 @@ export default function DataSourceAnalyzer() {
         {context_holder}
         <Page>
             <Card>
-                <Button href={"/"} type={"primary"} ghost={true}><Text>回到主页</Text></Button>
+                <Button href={"/#/"} type={"primary"} ghost={true}><Text>回到主页</Text></Button>
                 <center><Text type={"h1"}>ExamResultViewer - DataSourceAnalyzer</Text></center>
                 <center><Text>学业水平质量测试结果分析器 - 数据源文件分析器</Text></center>
                 <Text type={"h2"}>选择数据源文件</Text>
