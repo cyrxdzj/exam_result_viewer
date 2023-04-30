@@ -7,7 +7,7 @@ const text_size = {
 
 export function Background({children}) {
     return (<div style={{
-        "background": "linear-gradient(#0ba360 0%, #3cba92 100%)",
+        "background": "linear-gradient(to top, #000088 0%, #330867 100%)",
         "position": "fixed",
         "padding": "30px",
         "top": "0px",
