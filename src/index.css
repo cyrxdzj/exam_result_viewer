@@ -11,10 +11,16 @@ code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
 @font-face {
     font-family: 霞鹜文楷;
     src: url("LXGWWenKai-Regular.ttf");
 }
-.table-row{
-    padding: 0px;
+
+.ant-btn,
+.ant-input-wrapper,
+.ant-input,
+#excel_file_input,
+.ant-notification-notice-with-icon {
+    font-family: 霞鹜文楷;
 }
