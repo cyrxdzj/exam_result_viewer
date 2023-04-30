@@ -195,7 +195,7 @@ export default function DataSourceGenerator() {
                 <Input addonBefore={"工作表名"} id={"worktable_name_input"}/>
                 <NextLine/>
                 <Input addonBefore={"数据源名"} id={"data_src_name_input"}
-                       placeholder={"如：2020-2022届九年级下学期一模，应尽可能详细。"}/>
+                       placeholder={"如：2020-2022届九年级下学期一模，应尽可能详细。该项将会展示在个人数据卡片上，因此请命名为考试名称。"}/>
                 <NextLine/>
                 <Text type={"h2"}>二、选择数据范围与来源</Text>
                 <NextLine/>

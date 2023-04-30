@@ -289,6 +289,7 @@ export default function DataSourceAnalyzer() {
         for (var i in data_source_content.student) {
             var now_student = data_source_content.student[i];
             let now_personal_data = {};
+            now_personal_data["exam_name"]=data_source_content.name;
             now_personal_data["name"] = now_student.name;
             now_personal_data["id"] = now_student.id;
             now_personal_data["class"] = now_student["class"];

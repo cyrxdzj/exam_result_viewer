@@ -116,6 +116,8 @@ export function PersonalResult(props) {
     const data_source = props.data.subject;
     return (
         <Card>
+            <Text>{props.data.exam_name}</Text>
+            <NextLine size={"0px"}/>
             <Text type={"h3"}>{props.data.name}</Text>
             <NextLine size={"0px"}/>
             <Text>考号：{props.data["id"]}</Text>
