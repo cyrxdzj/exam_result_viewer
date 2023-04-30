@@ -48,8 +48,10 @@ export default function DataSourceAnalyzer() {
                 <NextLine/>
                 <Button type={"primary"} onClick={() => {
                     start_loading();
-                    analyze_data();
-                    stop_loading();
+                    setTimeout(()=>{
+                        analyze_data();
+                        stop_loading();
+                    },400);
                 }} loading={loading}>开始分析</Button>
             </Card>
             <NextLine size={"30px"}/>
