@@ -88,12 +88,13 @@ export default function DataSourceAnalyzer() {
         var left = 0, right = data_list.length - 1;
         var ans = -2;
         while (left <= right) {
-            var mid = (left + right) / 2;
-            if (data_list[mid] == data) {
+            var mid = parseInt((left + right) / 2);
+            if (data_list[mid] === data) {
                 ans = mid;
             }
-            if (data_list[mid] >= data) {
+            if (data_list[mid] > data) {
                 left = mid + 1;
+                ans = mid;
             } else {
                 right = mid - 1;
             }
