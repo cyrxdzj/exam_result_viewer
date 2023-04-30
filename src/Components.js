@@ -1,5 +1,6 @@
 import {notification, Table} from "antd";
 import React from "react";
+import ReactDOM from 'react-dom/client';
 import domtoimage from "dom-to-image"
 
 const text_size = {
@@ -131,8 +132,22 @@ export function PersonalResult(props) {
                 div_for_image.style.background = "linear-gradient(to top, #000088 0%, #330867 100%)";
                 div_for_image.style.zIndex = "-1000";
                 div_for_image.appendChild(e.target.cloneNode(true));
+                div_for_image.appendChild(document.createElement("br"));
+                var footer=document.createElement("div");
+                ReactDOM.createRoot(footer).render(
+                    <Card>
+                        <center><Text>Powered by ExamResultViewer.</Text></center>
+                        <NextLine size={"0px"}/>
+                        <center><Text>Developed by cyrxdzj.</Text></center>
+                    </Card>
+                );
+                var footer_text=document.createElement("Text");
+                //footer_text.innerText="";
+                //footer.appendChild(footer_text)
+                div_for_image.appendChild(footer);
                 document.body.appendChild(div_for_image);
                 domtoimage.toBlob(div_for_image).then((blob) => {
+                    document.body.removeChild(div_for_image);
                     console.log(blob);
                     navigator.clipboard.write([
                         new window.ClipboardItem({
@@ -143,7 +158,7 @@ export function PersonalResult(props) {
                         notification_api["success"]({
                             "message": "复制成功",
                             "description": "复制成功。",
-                        })
+                        });
                     }, () => {
                         console.log("Copy error!");
                         notification_api["error"]({
@@ -152,7 +167,6 @@ export function PersonalResult(props) {
                         })
                     })
                 });
-                //document.body.appendChild(div_for_image);
             }}>
                 <Text>{props.data.exam_name}</Text>
                 <NextLine size={"0px"}/>
