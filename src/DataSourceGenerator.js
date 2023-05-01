@@ -214,6 +214,8 @@ export default function DataSourceGenerator() {
                     <Input addonBefore={<Text>班级所在列</Text>} id={"class_col_id"}/>
                 </Space>
                 <NextLine/>
+                <Text>列号为字母，如A1的列号为A。</Text>
+                <NextLine/>
                 <Text type={"h2"}>三、配置科目</Text>
                 <NextLine/>
                 <Table components={components} dataSource={subject_data_source} columns={columns}
