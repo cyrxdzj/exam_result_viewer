@@ -122,7 +122,7 @@ export function PersonalResult(props) {
             {context_holder}
             <Card onDoubleClick={function (e) {
                 console.log(e.target);
-                if (e.target.style.borderRadius != "30px") {
+                if (e.target.style.borderRadius !== "30px") {
                     return;
                 }
                 var div_for_image = document.createElement("div");
@@ -130,10 +130,11 @@ export function PersonalResult(props) {
                 div_for_image.style.padding = "30px";
                 div_for_image.style.position = "fixed";
                 div_for_image.style.background = "linear-gradient(to top, #000088 0%, #330867 100%)";
+                div_for_image.style.borderRadius = "30px";
                 div_for_image.style.zIndex = "-1000";
                 div_for_image.appendChild(e.target.cloneNode(true));
                 div_for_image.appendChild(document.createElement("br"));
-                var footer=document.createElement("div");
+                var footer = document.createElement("div");
                 ReactDOM.createRoot(footer).render(
                     <Card>
                         <center><Text>Powered by ExamResultViewer.</Text></center>
@@ -141,12 +142,9 @@ export function PersonalResult(props) {
                         <center><Text>Developed by cyrxdzj.</Text></center>
                     </Card>
                 );
-                var footer_text=document.createElement("Text");
-                //footer_text.innerText="";
-                //footer.appendChild(footer_text)
                 div_for_image.appendChild(footer);
                 document.body.appendChild(div_for_image);
-                domtoimage.toBlob(div_for_image).then((blob) => {
+                domtoimage.toBlob(div_for_image,{bgcolor:"rgba(255,255,255,1)"}).then((blob) => {
                     document.body.removeChild(div_for_image);
                     console.log(blob);
                     navigator.clipboard.write([
