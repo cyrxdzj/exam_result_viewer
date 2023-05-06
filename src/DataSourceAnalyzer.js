@@ -48,10 +48,10 @@ export default function DataSourceAnalyzer() {
                 <NextLine/>
                 <Button type={"primary"} onClick={() => {
                     start_loading();
-                    setTimeout(()=>{
+                    setTimeout(() => {
                         analyze_data();
                         stop_loading();
-                    },400);
+                    }, 400);
                 }} loading={loading}>开始分析</Button>
             </Card>
             <NextLine size={"30px"}/>
@@ -109,6 +109,26 @@ export default function DataSourceAnalyzer() {
         return ans + 1;
     }
 
+    function filtrate_data_source_content(data_source_content) {
+        for (var student_id in data_source_content.student) {
+            let now_student = data_source_content.student[student_id];
+            let score = 0, valid = false;
+            for (var j in now_student.score) {
+                let data = now_student.score[j];
+                if (data !== -1 && data_source_content.subject[j].is_counted === "true") {
+                    score += data;
+                    valid = true;
+                }
+            }
+            if (valid) {
+                data_source_content.student[student_id].sum_score = score
+            } else {
+                data_source_content.student[student_id].sum_score = -1;
+            }
+        }
+        return data_source_content;
+    }
+
     function analyze_data() {
         //计算总览
         var overview_table_column = [{
@@ -153,20 +173,21 @@ export default function DataSourceAnalyzer() {
                     </Text>
                 </Tooltip>)
         }];
+        var handled_data = filtrate_data_source_content(data_source_content);
         let subject_scores = [];//每一科的所有分数，用于计算排名。
         var overview_table_data = [];
         let full_score = 0;
-        for (var subject_id in data_source_content.subject) {
+        for (var subject_id in handled_data.subject) {
             subject_scores.push([]);
-            if (data_source_content.subject[subject_id].is_counted === "true") {
-                full_score += data_source_content.subject[subject_id].full_score;
+            if (handled_data.subject[subject_id].is_counted === "true") {
+                full_score += handled_data.subject[subject_id].full_score;
             }
-            //console.log(data_source_content.subject[subject_id].is_counted,data_source_content.subject[subject_id].is_counted==="true");
+            //console.log(handled_data.subject[subject_id].is_counted,handled_data.subject[subject_id].is_counted==="true");
             let valid_cnt = 0, sum_score = 0;
             let max_score = -1, min_score = 0x3fffffff;
             let max_score_who = [], min_score_who = [];
-            for (var student_id in data_source_content.student) {
-                var score = data_source_content.student[student_id].score[subject_id];
+            for (var student_id in handled_data.student) {
+                var score = handled_data.student[student_id].score[subject_id];
                 if (score !== -1) {
                     valid_cnt++;
                     subject_scores[subject_id].push(score);
@@ -176,14 +197,14 @@ export default function DataSourceAnalyzer() {
                         max_score_who = [];
                     }
                     if (score === max_score) {
-                        max_score_who.push(join_student_info(data_source_content.student[student_id].name, data_source_content.student[student_id].id, data_source_content.student[student_id]["class"]));
+                        max_score_who.push(join_student_info(handled_data.student[student_id].name, handled_data.student[student_id].id, handled_data.student[student_id]["class"]));
                     }
                     if (score < min_score) {
                         min_score = score;
                         min_score_who = [];
                     }
                     if (score === min_score) {
-                        min_score_who.push(join_student_info(data_source_content.student[student_id].name, data_source_content.student[student_id].id, data_source_content.student[student_id]["class"]));
+                        min_score_who.push(join_student_info(handled_data.student[student_id].name, handled_data.student[student_id].id, handled_data.student[student_id]["class"]));
                     }
                 }
             }
@@ -193,18 +214,18 @@ export default function DataSourceAnalyzer() {
             let new_data = null;
             if (valid_cnt === 0) {
                 new_data = {
-                    "name": data_source_content.subject[subject_id].subject_name,
+                    "name": handled_data.subject[subject_id].subject_name,
                     "valid_cnt": 0,
-                    "full_score": data_source_content.subject[subject_id].full_score,
+                    "full_score": handled_data.subject[subject_id].full_score,
                     "average_score": -1,
                     "max_score": -1,
                     "min_score": -1
                 }
             } else {
                 new_data = {
-                    "name": data_source_content.subject[subject_id].subject_name,
+                    "name": handled_data.subject[subject_id].subject_name,
                     "valid_cnt": valid_cnt,
-                    "full_score": data_source_content.subject[subject_id].full_score,
+                    "full_score": handled_data.subject[subject_id].full_score,
                     "average_score": sum_score / valid_cnt,
                     "max_score": max_score,
                     "max_score_who": max_score_who,
@@ -221,18 +242,11 @@ export default function DataSourceAnalyzer() {
             let valid_cnt = 0, sum_score = 0;
             let max_score = -1, min_score = 0x3fffffff;
             let max_score_who = [], min_score_who = [];
-            for (student_id in data_source_content.student) {
-                let now_student = data_source_content.student[student_id];
-                let score = 0, valid = false;
-                for (var j in now_student.score) {
-                    let data = now_student.score[j];
-                    if (data !== -1 && data_source_content.subject[j].is_counted === "true") {
-                        score += data;
-                        valid = true;
-                    }
-                }
-                if (valid) {
+            for (student_id in handled_data.student) {
+                let now_student = handled_data.student[student_id];
+                if (now_student.sum_score !== -1) {
                     valid_cnt++;
+                    score = now_student.sum_score;
                     subject_scores[subject_scores.length - 1].push(score);
                     sum_score += score;
                     if (score > max_score) {
@@ -240,14 +254,14 @@ export default function DataSourceAnalyzer() {
                         max_score_who = [];
                     }
                     if (score === max_score) {
-                        max_score_who.push(join_student_info(data_source_content.student[student_id].name, data_source_content.student[student_id].id, data_source_content.student[student_id]["class"]));
+                        max_score_who.push(join_student_info(handled_data.student[student_id].name, handled_data.student[student_id].id, handled_data.student[student_id]["class"]));
                     }
                     if (score < min_score) {
                         min_score = score;
                         min_score_who = [];
                     }
                     if (score === min_score) {
-                        min_score_who.push(join_student_info(data_source_content.student[student_id].name, data_source_content.student[student_id].id, data_source_content.student[student_id]["class"]));
+                        min_score_who.push(join_student_info(handled_data.student[student_id].name, handled_data.student[student_id].id, handled_data.student[student_id]["class"]));
                     }
                 }
             }
@@ -282,39 +296,32 @@ export default function DataSourceAnalyzer() {
         //console.log(overview_table_data);
         set_data_overview(
             <>
-                <Text>共{JSON.stringify(data_source_content.student.length)}条数据。</Text>
+                <Text>共{JSON.stringify(handled_data.student.length)}条数据。</Text>
                 <NextLine/>
                 <Table columns={overview_table_column} dataSource={overview_table_data} pagination={false}/>
             </>);
         //计算个人成绩
         let personal_list_data = [];
-        for (var i in data_source_content.student) {
-            var now_student = data_source_content.student[i];
+        for (var i in handled_data.student) {
+            var now_student = handled_data.student[i];
             let now_personal_data = {};
-            now_personal_data["exam_name"]=data_source_content.name;
+            now_personal_data["exam_name"] = handled_data.name;
             now_personal_data["name"] = now_student.name;
             now_personal_data["id"] = now_student.id;
             now_personal_data["class"] = now_student["class"];
             now_personal_data["subject"] = [];
-            for (j in data_source_content.subject) {
+            for (var j in handled_data.subject) {
                 now_personal_data["subject"].push({
-                    "name": data_source_content.subject[j].subject_name,
-                    "full_score": data_source_content.subject[j].full_score,
+                    "name": handled_data.subject[j].subject_name,
+                    "full_score": handled_data.subject[j].full_score,
                     "score": now_student.score[j],
                     "rank": get_rank(now_student.score[j], subject_scores[j]),
                     "valid_cnt": subject_scores[j].length
                 });
             }
             //计算总分
-            let score = 0, valid = false;
-            for (j in now_student.score) {
-                let data = now_student.score[j];
-                if (data !== -1 && data_source_content.subject[j].is_counted === "true") {
-                    score += data;
-                    valid = true;
-                }
-            }
-            if (valid) {
+            if (now_student.sum_score !== -1) {
+                score = now_student.sum_score;
                 now_personal_data["subject"].push({
                         "name": "总分",
                         "full_score": full_score,
