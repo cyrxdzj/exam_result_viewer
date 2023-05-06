@@ -273,6 +273,17 @@ export default function DataSourceGenerator() {
         console.log(subject_data_source);
     }
 
+    function get_excel_row(worktable_content, col_id, row_id) {
+        for (var i = row_id; i >= 1; i--) {
+            try {
+                return worktable_content[col_id + i.toString()].w;
+            } catch (e) {
+                console.log(e);
+            }
+        }
+        return "No Data";
+    }
+
     function generate_data_source() {
         add_log("开始生成数据源文件。\n", "clear");
         console.log(log_content);
@@ -350,9 +361,9 @@ export default function DataSourceGenerator() {
                 add_log(`正在生成，第${now_row - from_line + 1}行，共${to_line - now_row + 1}行。\n`, "del_line");
                 let score = [];
                 let now_student = {
-                    "name": worktable_content[name_col_id + now_row.toString()].w,
-                    "id": worktable_content[id_col_id + now_row.toString()].w,
-                    "class": worktable_content[class_col_id + now_row.toString()].w,
+                    "name": get_excel_row(worktable_content, name_col_id, now_row),
+                    "id": get_excel_row(worktable_content, id_col_id, now_row),
+                    "class": get_excel_row(worktable_content, class_col_id, now_row),
                     "score": null
                 };
                 for (var i in subject_list) {
