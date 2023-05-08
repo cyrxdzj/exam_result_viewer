@@ -368,7 +368,11 @@ export default function DataSourceGenerator() {
                 };
                 for (var i in subject_list) {
                     let now_subject = subject_list[i];
-                    var data = worktable_content[now_subject["col_id"] + now_row.toString()].w;
+                    var data="No Data";
+                    try{
+                        data = worktable_content[now_subject["col_id"] + now_row.toString()].w;
+                    }
+                    catch(e){console.log(e);}
                     if (!re_float.test(data)) {
                         add_log(`考生姓名${now_student.name}，考号${now_student.id}，科目${now_subject.subject_name}，成绩无效。原数据：${data}\n\n`, "del_line");
                         data = -1;
