@@ -87,6 +87,7 @@ export function PersonalResult(props) {
             }
         ]
     }*/
+
     const [notification_api, context_holder] = notification.useNotification();
     const table_column = [
         {
@@ -117,6 +118,7 @@ export function PersonalResult(props) {
         }
     ]
     const data_source = props.data.subject;
+    console.log(props.uncounted_subjects)
     return (
         <>
             {context_holder}
@@ -125,46 +127,52 @@ export function PersonalResult(props) {
                 if (e.target.style.borderRadius !== "30px") {
                     return;
                 }
-                var div_for_image = document.createElement("div");
-                div_for_image.style.width = div_for_image.style.height = "auto";
-                div_for_image.style.padding = "30px";
-                div_for_image.style.position = "fixed";
-                div_for_image.style.background = "linear-gradient(to top, #000088 0%, #330867 100%)";
-                div_for_image.style.borderRadius = "30px";
-                div_for_image.style.zIndex = "-1000";
-                div_for_image.appendChild(e.target.cloneNode(true));
-                div_for_image.appendChild(document.createElement("br"));
-                var footer = document.createElement("div");
-                ReactDOM.createRoot(footer).render(
-                    <Card>
-                        <center><Text>Powered by ExamResultViewer.</Text></center>
-                        <NextLine size={"0px"}/>
-                        <center><Text>Developed by cyrxdzj.</Text></center>
-                    </Card>
-                );
-                div_for_image.appendChild(footer);
-                document.body.appendChild(div_for_image);
-                domtoimage.toBlob(div_for_image,{bgcolor:"rgba(255,255,255,1)"}).then((blob) => {
-                    document.body.removeChild(div_for_image);
-                    console.log(blob);
-                    navigator.clipboard.write([
-                        new window.ClipboardItem({
-                            [blob.type]: blob,
-                        })
-                    ]).then(() => {
-                        console.log("Copied.");
-                        notification_api["success"]({
-                            "message": "复制成功",
-                            "description": "复制成功。",
-                        });
-                    }, () => {
-                        console.log("Copy error!");
-                        notification_api["error"]({
-                            "message": "复制失败",
-                            "description": "复制失败。",
-                        })
-                    })
+                notification_api["info"]({
+                    "message": "正在复制",
+                    "description": "正在尝试复制，这需要一点时间。",
                 });
+                setTimeout(function () {
+                    var div_for_image = document.createElement("div");
+                    div_for_image.style.width = div_for_image.style.height = "auto";
+                    div_for_image.style.padding = "30px";
+                    div_for_image.style.position = "fixed";
+                    div_for_image.style.background = "linear-gradient(to top, #000088 0%, #330867 100%)";
+                    div_for_image.style.borderRadius = "30px";
+                    div_for_image.style.zIndex = "-1000";
+                    div_for_image.appendChild(e.target.cloneNode(true));
+                    div_for_image.appendChild(document.createElement("br"));
+                    var footer = document.createElement("div");
+                    ReactDOM.createRoot(footer).render(
+                        <Card>
+                            <center><Text>Powered by ExamResultViewer.</Text></center>
+                            <NextLine size={"0px"}/>
+                            <center><Text>Developed by cyrxdzj.</Text></center>
+                        </Card>
+                    );
+                    div_for_image.appendChild(footer);
+                    document.body.appendChild(div_for_image);
+                    domtoimage.toBlob(div_for_image, {bgcolor: "rgba(255,255,255,1)"}).then((blob) => {
+                        document.body.removeChild(div_for_image);
+                        console.log(blob);
+                        navigator.clipboard.write([
+                            new window.ClipboardItem({
+                                [blob.type]: blob,
+                            })
+                        ]).then(() => {
+                            console.log("Copied.");
+                            notification_api["success"]({
+                                "message": "复制成功",
+                                "description": "复制成功。",
+                            });
+                        }, () => {
+                            console.log("Copy error!");
+                            notification_api["error"]({
+                                "message": "复制失败",
+                                "description": "复制失败。",
+                            })
+                        })
+                    });
+                }, 200);
             }}>
                 <Text>{props.data.exam_name}</Text>
                 <NextLine size={"0px"}/>
@@ -176,6 +184,7 @@ export function PersonalResult(props) {
                 <NextLine size={"0px"}/>
                 <Table columns={table_column} dataSource={data_source} pagination={false} className={"table-row"}
                        size={"small"}/>
+                {props.uncounted_subjects_dom}
             </Card>
         </>
     )

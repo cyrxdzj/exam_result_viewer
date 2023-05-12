@@ -1,6 +1,6 @@
 import {Card, NextLine, Page, PersonalResult, Text} from "./Components";
 import React, {Fragment, useState} from "react";
-import {Button, List, notification, Table, Tooltip} from "antd";
+import {Button, List, notification, Space, Switch, Table, Tooltip} from "antd";
 
 let data_source_content = null;
 export default function DataSourceAnalyzer() {
@@ -46,13 +46,18 @@ export default function DataSourceAnalyzer() {
                     }
                 }}/>
                 <NextLine/>
-                <Button type={"primary"} onClick={() => {
+                <Space>
+                    <Switch id={"calculate_personal_data"} defaultChecked={true}></Switch>
+                    <Text>计算个人数据。关闭它能显著提高速度。</Text>
+                </Space>
+                <NextLine/>
+                <Button type={"primary"} loading={loading} id={"start_analyze"} onClick={() => {
                     start_loading();
                     setTimeout(() => {
                         analyze_data();
                         stop_loading();
                     }, 400);
-                }} loading={loading}>开始分析</Button>
+                }}>开始分析</Button>
             </Card>
             <NextLine size={"30px"}/>
             <Card>
@@ -79,35 +84,6 @@ export default function DataSourceAnalyzer() {
         set_loading(false);
     }
 
-    function join_student_info(name, id, stu_class) {
-        return `${name}-${id}-${stu_class}`;
-    }
-
-    function render_student_list_in_tooltip(student_list) {
-        let res = "";
-        for (var i in student_list) {
-            res += student_list[i] + ((parseInt(i) === (student_list.length - 1)) ? "。" : "，");
-        }
-        return res;
-    }
-
-    function get_rank(data, data_list) {
-        var left = 0, right = data_list.length - 1;
-        var ans = -2;
-        while (left <= right) {
-            var mid = parseInt((left + right) / 2);
-            if (data_list[mid] === data) {
-                ans = mid;
-            }
-            if (data_list[mid] > data) {
-                left = mid + 1;
-                ans = mid;
-            } else {
-                right = mid - 1;
-            }
-        }
-        return ans + 1;
-    }
 
     function filtrate_data_source_content(data_source_content) {
         for (var student_id in data_source_content.student) {
@@ -130,6 +106,47 @@ export default function DataSourceAnalyzer() {
     }
 
     function analyze_data() {
+        function join_student_info(name, id, stu_class) {
+            return `${name}-${id}-${stu_class}`;
+        }
+
+        function render_student_list_in_tooltip(student_list) {
+            let res = "";
+            for (var i in student_list) {
+                res += student_list[i] + ((parseInt(i) === (student_list.length - 1)) ? "。" : "，");
+            }
+            return res;
+        }
+
+        function get_rank(data, data_list) {
+            var left = 0, right = data_list.length - 1;
+            var ans = -2;
+            while (left <= right) {
+                var mid = parseInt((left + right) / 2);
+                if (data_list[mid] === data) {
+                    ans = mid;
+                }
+                if (data_list[mid] > data) {
+                    left = mid + 1;
+                    ans = mid;
+                } else {
+                    right = mid - 1;
+                }
+            }
+            return ans + 1;
+        }
+
+        function render_uncounted_subjects(uncounted_subjects) {
+            let result = "";
+            for (var i = 0; i < uncounted_subjects.length; i++) {
+                result += uncounted_subjects[i];
+                if (i !== (uncounted_subjects.length - 1)) {
+                    result += "、";
+                }
+            }
+            return result;
+        }
+
         //计算总览
         var overview_table_column = [{
             "title": <Text bold={true}>科目名称</Text>,
@@ -175,12 +192,15 @@ export default function DataSourceAnalyzer() {
         }];
         var handled_data = filtrate_data_source_content(data_source_content);
         let subject_scores = [];//每一科的所有分数，用于计算排名。
+        let uncounted_subjects = [];
         var overview_table_data = [];
         let full_score = 0;
         for (var subject_id in handled_data.subject) {
             subject_scores.push([]);
             if (handled_data.subject[subject_id].is_counted === "true") {
                 full_score += handled_data.subject[subject_id].full_score;
+            } else {
+                uncounted_subjects.push(handled_data.subject[subject_id].subject_name);
             }
             //console.log(handled_data.subject[subject_id].is_counted,handled_data.subject[subject_id].is_counted==="true");
             let valid_cnt = 0, sum_score = 0;
@@ -301,6 +321,19 @@ export default function DataSourceAnalyzer() {
                 <Table columns={overview_table_column} dataSource={overview_table_data} pagination={false}/>
             </>);
         //计算个人成绩
+        if (document.getElementById("calculate_personal_data").ariaChecked === "false") {
+            set_data_personal(<NoPersonalData onStart={() => {
+                start_loading();
+            }} onMiddle={() => {
+                var a = document.getElementById("calculate_personal_data");
+                if (a.ariaChecked === "false") {
+                    a.click();
+                    a.ariaChecked = "true";
+                }
+                analyze_data();
+            }} onEnd={() => stop_loading()}/>);
+            return;
+        }
         let personal_list_data = [];
         for (var i in handled_data.student) {
             var now_student = handled_data.student[i];
@@ -343,12 +376,34 @@ export default function DataSourceAnalyzer() {
             personal_list_data.push(now_personal_data);
         }
         console.log(personal_list_data);
+        let uncounted_subjects_dom = (uncounted_subjects.length === 0) ? (<></>) : (
+            <>
+                <NextLine size={"0px"}/>
+                <Text>注：{render_uncounted_subjects(uncounted_subjects)}科目不计入总分。</Text>
+            </>
+        )
         set_data_personal(
             <List grid={{gutter: 16, column: 4}} dataSource={personal_list_data} renderItem={(item) => (
                 <List.Item>
-                    <PersonalResult data={item}/>
+                    <PersonalResult data={item} uncounted_subjects_dom={uncounted_subjects_dom}/>
                 </List.Item>
             )}/>
         );
     }
+}
+
+function NoPersonalData(props) {
+    const [loading, set_loading] = useState(false);
+    return (<>
+        <Text>计算个人数据开关已关闭。</Text>
+        <Button type={"primary"} loading={loading} onClick={(e) => {
+            set_loading(true);
+            props.onStart();
+            setTimeout(() => {
+                props.onMiddle();
+                props.onEnd();
+                set_loading(false);
+            }, 400);
+        }}>重新开启并计算。</Button>
+    </>);
 }
