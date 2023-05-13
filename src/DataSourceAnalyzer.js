@@ -1,7 +1,7 @@
 import {Card, NextLine, Page, PersonalResult, Text} from "./Components";
 import React, {Fragment, useState} from "react";
 import ReactDOM from 'react-dom/client';
-import {Button, Col, notification, Row, Space, Switch, Table, Tooltip} from "antd";
+import {Button, Col, notification, Row, Space, Spin, Switch, Table, Tooltip} from "antd";
 import {FixedSizeList} from "react-window";
 
 let data_source_content = null;
@@ -62,19 +62,21 @@ export default function DataSourceAnalyzer() {
                 }}>开始分析</Button>
             </Card>
             <NextLine size={"30px"}/>
-            <Card>
-                <Text type={"h2"}>数据总览</Text>
-                <NextLine/>
-                {data_overview}
-                <NextLine/>
-                <Text type={"h2"}>个人数据</Text>
-                <NextLine/>
-                <Text>由于列表使用了“虚拟滚动”新技术，您不可以使用浏览器的查找功能。</Text>
-                <NextLine/>
-                <Text>双击卡片<b>空白部分</b>可以复制卡片为图片，复制到剪贴板里的图片可以使用Ctrl+V快捷键粘贴至微信、Word等软件中。<s>可以将其发送给家长，很有纪念意义，不是吗？</s></Text>
-                <NextLine/>
-                {data_personal}
-            </Card>
+            <Spin spinning={loading} wrapperClassName={"border_radius"}>
+                <Card>
+                    <Text type={"h2"}>数据总览</Text>
+                    <NextLine/>
+                    {data_overview}
+                    <NextLine/>
+                    <Text type={"h2"}>个人数据</Text>
+                    <NextLine/>
+                    <Text>由于列表使用了“虚拟滚动”新技术，您不可以使用浏览器的查找功能。</Text>
+                    <NextLine/>
+                    <Text>双击卡片<b>空白部分</b>可以复制卡片为图片，复制到剪贴板里的图片可以使用Ctrl+V快捷键粘贴至微信、Word等软件中。<s>可以将其发送给家长，很有纪念意义，不是吗？</s></Text>
+                    <NextLine/>
+                    {data_personal}
+                </Card>
+            </Spin>
         </Page>
     </>)
 
@@ -437,7 +439,7 @@ function NoPersonalData(props) {
     const [loading, set_loading] = useState(false);
     return (<>
         <Text>计算个人数据开关已关闭。</Text>
-        <Button type={"primary"} loading={loading} onClick={(e) => {
+        <Button type={"primary"} loading={loading} onClick={() => {
             set_loading(true);
             props.onStart();
             setTimeout(() => {

@@ -22,8 +22,8 @@ export function Background({children}) {
 
 export function Card(props) {
     return (<div style={{
-        "background": "rgba(255,255,255,0.5)", "padding": "30px", "borderRadius": "30px"
-    }} {...props}>{props.children}</div>);
+        "background": "rgba(255,255,255,0.5)", "padding": "30px"
+    }} {...props} className={"border_radius"}>{props.children}</div>);
 }
 
 export function Page({children}) {

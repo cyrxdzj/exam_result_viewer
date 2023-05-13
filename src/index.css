@@ -34,3 +34,8 @@ a {
     color: #1677ff;
     text-decoration: none;
 }
+
+.border_radius,
+.ant-spin-blur::after {
+    border-radius: 30px;
+}
