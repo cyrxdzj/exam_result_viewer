@@ -1,8 +1,9 @@
 import {Card, NextLine, Page, PersonalResult, Text} from "./Components";
 import React, {Fragment, useState} from "react";
-import {Button, List, notification, Space, Spin, Switch, Table, Tooltip} from "antd";
+import {Button, Input, List, notification, Space, Spin, Switch, Table, Tooltip} from "antd";
 
 let data_source_content = null;
+let personal_list_data, uncounted_subjects_dom;
 export default function DataSourceAnalyzer() {
     const [notification_api, context_holder] = notification.useNotification();
     let [data_overview, set_data_overview] = useState(<Fragment/>);
@@ -71,6 +72,9 @@ export default function DataSourceAnalyzer() {
                     <Text>由于列表使用了分页技术以降低渲染时卡顿，您不可以使用浏览器的查找功能。</Text>
                     <NextLine/>
                     <Text>双击卡片<b>空白部分</b>可以复制卡片为图片，复制到剪贴板里的图片可以使用Ctrl+V快捷键粘贴至微信、Word等软件中。<s>可以将其发送给家长，很有纪念意义，不是吗？</s></Text>
+                    <NextLine/>
+                    <Input addonBefore={<Text>搜索</Text>} id={"search_input"} placeHolder={"可以根据姓名或考号搜索"}
+                           onChange={handle_personal_data_and_set}/>
                     <NextLine/>
                     {data_personal}
                 </Card>
@@ -316,12 +320,11 @@ export default function DataSourceAnalyzer() {
             overview_table_data.push(new_data);
         }
         //console.log(overview_table_data);
-        set_data_overview(
-            <>
-                <Text>共{JSON.stringify(handled_data.student.length)}条数据。</Text>
-                <NextLine/>
-                <Table columns={overview_table_column} dataSource={overview_table_data} pagination={false}/>
-            </>);
+        set_data_overview(<>
+            <Text>共{JSON.stringify(handled_data.student.length)}条数据。</Text>
+            <NextLine/>
+            <Table columns={overview_table_column} dataSource={overview_table_data} pagination={false}/>
+        </>);
         //计算个人成绩
         if (document.getElementById("calculate_personal_data").ariaChecked === "false") {
             set_data_personal(<NoPersonalData onStart={() => {
@@ -336,7 +339,7 @@ export default function DataSourceAnalyzer() {
             }} onEnd={() => stop_loading()}/>);
             return;
         }
-        let personal_list_data = [];
+        personal_list_data = [];
         for (var i in handled_data.student) {
             var now_student = handled_data.student[i];
             let now_personal_data = {};
@@ -358,41 +361,51 @@ export default function DataSourceAnalyzer() {
             if (now_student.sum_score !== -1) {
                 score = now_student.sum_score;
                 now_personal_data["subject"].push({
-                        "name": "总分",
-                        "full_score": full_score,
-                        "score": score,
-                        "rank": get_rank(score, subject_scores[subject_scores.length - 1]),
-                        "valid_cnt": subject_scores[subject_scores.length - 1].length
-                    }
-                )
+                    "name": "总分",
+                    "full_score": full_score,
+                    "score": score,
+                    "rank": get_rank(score, subject_scores[subject_scores.length - 1]),
+                    "valid_cnt": subject_scores[subject_scores.length - 1].length
+                })
             } else {
                 now_personal_data["subject"].push({
-                        "name": "总分",
-                        "full_score": full_score,
-                        "score": -1,
-                        "rank": get_rank(score, subject_scores[subject_scores.length - 1]),
-                        "valid_cnt": subject_scores[subject_scores.length - 1].length
-                    }
-                )
+                    "name": "总分",
+                    "full_score": full_score,
+                    "score": -1,
+                    "rank": get_rank(score, subject_scores[subject_scores.length - 1]),
+                    "valid_cnt": subject_scores[subject_scores.length - 1].length
+                })
             }
             personal_list_data.push(now_personal_data);
         }
-        console.log(personal_list_data);
-        let uncounted_subjects_dom = (uncounted_subjects.length === 0) ? (<></>) : (
-            <>
-                <NextLine size={"0px"}/>
-                <Text>注：{render_uncounted_subjects(uncounted_subjects)}科目不计入总分。</Text>
-            </>
-        )
-        set_data_personal(
-            <List pagination={{"position": "bottom", "align": "center", "pageSize": 24, "showQuickJumper": true}}
-                  grid={{gutter: 16, column: 4}}
-                  dataSource={personal_list_data} renderItem={(item) => (
-                <List.Item>
-                    <PersonalResult data={item} uncounted_subjects_dom={uncounted_subjects_dom}/>
-                </List.Item>
-            )}/>
-        );
+        uncounted_subjects_dom = (uncounted_subjects.length === 0) ? (<></>) : (<>
+            <NextLine size={"0px"}/>
+            <Text>注：{render_uncounted_subjects(uncounted_subjects)}科目不计入总分。</Text>
+        </>)
+        handle_personal_data_and_set();
+    }
+
+    function handle_personal_data_and_set()//此函数应用于准备未来的搜索功能。
+    {
+        let new_personal_list_data = [];
+        let search_text = document.getElementById("search_input").value;
+        for (var i in personal_list_data) {
+            var item = personal_list_data[i];
+            console.log(item);
+            if (search_text === "") {
+                new_personal_list_data.push(item);
+            } else if (item.name.indexOf(search_text) !== -1) {
+                new_personal_list_data.push(item);
+            } else if (item.id.indexOf(search_text) !== -1) {
+                new_personal_list_data.push(item);
+            }
+        }
+        set_data_personal(<List
+            pagination={{"position": "bottom", "align": "center", "pageSize": 24, "showQuickJumper": true}}
+            grid={{gutter: 16, column: 4}}
+            dataSource={new_personal_list_data} renderItem={(item) => (<List.Item>
+            <PersonalResult data={item} uncounted_subjects_dom={uncounted_subjects_dom}/>
+        </List.Item>)}/>);
     }
 }
 
