@@ -76,7 +76,7 @@ export function Page({children}) {
 
 export function Text(props) {
     return (<span style={{
-        "fontSize": text_size[props.type?props.type:"normal"],
+        "fontSize": text_size[props.type ? props.type : "normal"],
         "fontFamily": "霞鹜文楷",
         "fontWeight": ((props.type !== undefined && props.type.startsWith("h")) || props.bold) ? "bold" : "normal",
     }} {...props}>{props.children}</span>);
@@ -138,7 +138,7 @@ export function PersonalResult(props) {
             {context_holder}
             <Card onDoubleClick={function (e) {
                 console.log(e.target);
-                if (e.target.style.borderRadius !== "30px") {
+                if (e.target.className.indexOf("border_radius") === -1) {
                     return;
                 }
                 notification_api["info"]({
@@ -164,6 +164,7 @@ export function PersonalResult(props) {
                         </Card>
                     );
                     div_for_image.appendChild(footer);
+                    console.log("Append to body.");
                     document.body.appendChild(div_for_image);
                     domtoimage.toBlob(div_for_image, {bgcolor: "rgba(255,255,255,1)"}).then((blob) => {
                         document.body.removeChild(div_for_image);

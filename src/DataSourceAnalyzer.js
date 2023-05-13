@@ -1,8 +1,6 @@
 import {Card, NextLine, Page, PersonalResult, Text} from "./Components";
 import React, {Fragment, useState} from "react";
-import ReactDOM from 'react-dom/client';
-import {Button, Col, notification, Row, Space, Spin, Switch, Table, Tooltip} from "antd";
-import {FixedSizeList} from "react-window";
+import {Button, List, notification, Space, Spin, Switch, Table, Tooltip} from "antd";
 
 let data_source_content = null;
 export default function DataSourceAnalyzer() {
@@ -70,7 +68,7 @@ export default function DataSourceAnalyzer() {
                     <NextLine/>
                     <Text type={"h2"}>个人数据</Text>
                     <NextLine/>
-                    <Text>由于列表使用了“虚拟滚动”新技术，您不可以使用浏览器的查找功能。</Text>
+                    <Text>由于列表使用了分页技术以降低渲染时卡顿，您不可以使用浏览器的查找功能。</Text>
                     <NextLine/>
                     <Text>双击卡片<b>空白部分</b>可以复制卡片为图片，复制到剪贴板里的图片可以使用Ctrl+V快捷键粘贴至微信、Word等软件中。<s>可以将其发送给家长，很有纪念意义，不是吗？</s></Text>
                     <NextLine/>
@@ -386,52 +384,15 @@ export default function DataSourceAnalyzer() {
                 <Text>注：{render_uncounted_subjects(uncounted_subjects)}科目不计入总分。</Text>
             </>
         )
-        //计算各项高度
-        var test_div = document.createElement("div");
-        test_div.style.width = test_div.style.height = "auto";
-        test_div.style.position = "fixed";
-        test_div.style.zIndex = "-1000";
-        ReactDOM.createRoot(test_div).render(
-            <PersonalResult data={personal_list_data[0]}
-                            uncounted_subjects_dom={uncounted_subjects_dom}/>
+        set_data_personal(
+            <List pagination={{"position": "bottom", "align": "center", "pageSize": 24, "showQuickJumper": true}}
+                  grid={{gutter: 16, column: 4}}
+                  dataSource={personal_list_data} renderItem={(item) => (
+                <List.Item>
+                    <PersonalResult data={item} uncounted_subjects_dom={uncounted_subjects_dom}/>
+                </List.Item>
+            )}/>
         );
-        document.body.appendChild(test_div);
-        setTimeout(() => {
-            let item_height = test_div.clientHeight + 8;
-            let item_count = Math.ceil(personal_list_data.length / 4);
-            console.log(`Item height ${item_height} Item count ${item_count}`);
-            const PersonalDataRow = ({index, style}) => (
-                <div style={style}>
-                    <Row gutter={8}>
-                        <Col span={6}>
-                            {(index * 4 < personal_list_data.length) ? (
-                                <PersonalResult data={personal_list_data[index * 4]}
-                                                uncounted_subjects_dom={uncounted_subjects_dom}/>) : (<></>)}</Col>
-                        <Col span={6}>
-                            {(index * 4 + 1 < personal_list_data.length) ? (
-                                <PersonalResult data={personal_list_data[index * 4 + 1]}
-                                                uncounted_subjects_dom={uncounted_subjects_dom}/>) : (<></>)}</Col>
-                        <Col span={6}>
-                            {(index * 4 + 2 < personal_list_data.length) ? (
-                                <PersonalResult data={personal_list_data[index * 4 + 2]}
-                                                uncounted_subjects_dom={uncounted_subjects_dom}/>) : (<></>)}</Col>
-                        <Col span={6}>
-                            {(index * 4 + 3 < personal_list_data.length) ? (
-                                <PersonalResult data={personal_list_data[index * 4 + 3]}
-                                                uncounted_subjects_dom={uncounted_subjects_dom}/>) : (<></>)}</Col>
-                    </Row>
-                </div>
-            )
-            set_data_personal(
-                <FixedSizeList
-                    height={Math.min(item_height * item_count, 2000)}
-                    itemSize={item_height}
-                    itemCount={item_count}
-                    style={{"overflowX": "hidden"}}>
-                    {PersonalDataRow}
-                </FixedSizeList>
-            )
-        }, 100)
     }
 }
 
