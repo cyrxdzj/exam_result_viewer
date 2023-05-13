@@ -28,10 +28,7 @@ export function Card(props) {
 
 export function Page({children}) {
     const thanks_table_data = [{
-        "key": "antd",
-        "name": "Ant Design",
-        "usage": "页面组件设计，如按钮、输入框等。",
-        "url": "https://ant.design"
+        "key": "antd", "name": "Ant Design", "usage": "页面组件设计，如按钮、输入框等。", "url": "https://ant.design"
     }, {
         "key": "lxgw",
         "name": <Text>霞鹜文楷</Text>,
@@ -66,7 +63,7 @@ export function Page({children}) {
             <NextLine/>
             <center>
                 <Text>Powered by <a href={"https://github.com/cyrxdzj/exam_result_viewer"} target={"_blank"}
-                                    rel={"noreferrer"}>ExamResultViewer</a>, by <a
+                                    rel={"noreferrer"}>ExamResultViewer</a>, developed by <a
                     href={"https://space.bilibili.com/673922693?spm_id_from=333.1007.0.0"} target={"_blank"}
                     rel={"noreferrer"}>cyrxdzj</a>.</Text>
             </center>
@@ -103,38 +100,32 @@ export function PersonalResult(props) {
     }*/
 
     const [notification_api, context_holder] = notification.useNotification();
-    const table_column = [
-        {
-            "title": <Text>科目名称</Text>,
-            "key": "name",
-            "dataIndex": "name",
-            render: (_, record) => (<Text>{record.name}</Text>)
-        },
-        {
-            "title": <Text>得分</Text>,
-            "key": "score",
-            "dataIndex": "score",
-            render: (_, record) => (record.score === -1) ? (<Text>无效</Text>) : (
-                <Text>{JSON.stringify(record.score)}</Text>)
-        },
-        {
-            "title": <Text>满分</Text>,
-            "key": "full_score",
-            "dataIndex": "full_score",
-            render: (_, record) => (<Text>{JSON.stringify(record.full_score)}</Text>)
-        },
-        {
-            "title": <Text>数据内排名</Text>,
-            "key": "rank",
-            "dataIndex": "rank",
-            render: (_, record) => (record.score === -1) ? (<Text>无效</Text>) : (
-                <Text>{`${JSON.stringify(record.rank)}/${JSON.stringify(record.valid_cnt)}`}</Text>)
-        }
-    ]
+    const table_column = [{
+        "title": <Text>科目名称</Text>,
+        "key": "name",
+        "dataIndex": "name",
+        render: (_, record) => (<Text>{record.name}</Text>)
+    }, {
+        "title": <Text>得分</Text>,
+        "key": "score",
+        "dataIndex": "score",
+        render: (_, record) => (record.score === -1) ? (<Text>无效</Text>) : (
+            <Text>{JSON.stringify(record.score)}</Text>)
+    }, {
+        "title": <Text>满分</Text>,
+        "key": "full_score",
+        "dataIndex": "full_score",
+        render: (_, record) => (<Text>{JSON.stringify(record.full_score)}</Text>)
+    }, {
+        "title": <Text>数据内排名</Text>,
+        "key": "rank",
+        "dataIndex": "rank",
+        render: (_, record) => (record.score === -1) ? (<Text>无效</Text>) : (
+            <Text>{`${JSON.stringify(record.rank)}/${JSON.stringify(record.valid_cnt)}`}</Text>)
+    }]
     const data_source = props.data.subject;
     console.log(props.uncounted_subjects)
-    return (
-        <>
+    return (<>
             {context_holder}
             <Card onDoubleClick={function (e) {
                 console.log(e.target);
@@ -142,8 +133,7 @@ export function PersonalResult(props) {
                     return;
                 }
                 notification_api["info"]({
-                    "message": "正在复制",
-                    "description": "正在尝试复制，这需要一点时间。",
+                    "message": "正在复制", "description": "正在尝试复制，这需要一点时间。",
                 });
                 setTimeout(function () {
                     var div_for_image = document.createElement("div");
@@ -156,34 +146,28 @@ export function PersonalResult(props) {
                     div_for_image.appendChild(e.target.cloneNode(true));
                     div_for_image.appendChild(document.createElement("br"));
                     var footer = document.createElement("div");
-                    ReactDOM.createRoot(footer).render(
-                        <Card>
-                            <center><Text>Powered by ExamResultViewer.</Text></center>
-                            <NextLine size={"0px"}/>
-                            <center><Text>Developed by cyrxdzj.</Text></center>
-                        </Card>
-                    );
+                    ReactDOM.createRoot(footer).render(<Card>
+                        <center><Text>Powered by ExamResultViewer.</Text></center>
+                        <NextLine size={"0px"}/>
+                        <center><Text>Developed by cyrxdzj.</Text></center>
+                    </Card>);
                     div_for_image.appendChild(footer);
                     console.log("Append to body.");
                     document.body.appendChild(div_for_image);
                     domtoimage.toBlob(div_for_image, {bgcolor: "rgba(255,255,255,1)"}).then((blob) => {
                         document.body.removeChild(div_for_image);
                         console.log(blob);
-                        navigator.clipboard.write([
-                            new window.ClipboardItem({
-                                [blob.type]: blob,
-                            })
-                        ]).then(() => {
+                        navigator.clipboard.write([new window.ClipboardItem({
+                            [blob.type]: blob,
+                        })]).then(() => {
                             console.log("Copied.");
                             notification_api["success"]({
-                                "message": "复制成功",
-                                "description": "复制成功。",
+                                "message": "复制成功", "description": "复制成功。",
                             });
                         }, () => {
                             console.log("Copy error!");
                             notification_api["error"]({
-                                "message": "复制失败",
-                                "description": "复制失败。",
+                                "message": "复制失败", "description": "复制失败。",
                             })
                         })
                     });
@@ -201,6 +185,5 @@ export function PersonalResult(props) {
                        size={"small"}/>
                 {props.uncounted_subjects_dom}
             </Card>
-        </>
-    )
+        </>)
 }
