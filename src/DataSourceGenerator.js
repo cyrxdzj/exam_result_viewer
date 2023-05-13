@@ -109,13 +109,25 @@ export default function DataSourceGenerator() {
     }
 
     const default_columns = [{
-        title: <Text bold={true}>科目名称</Text>, dataIndex: 'subject_name', key: 'subject_name',
+        title: <Text bold={true}>科目名称</Text>,
+        dataIndex: 'subject_name',
+        key: 'subject_name',
+        render: (_, record) => (<Input id={"subject_name_input_" + record.key.toString()}/>)
     }, {
-        title: <Text bold={true}>满分</Text>, dataIndex: 'full_score', key: 'full_score',
+        title: <Text bold={true}>满分</Text>,
+        dataIndex: 'full_score',
+        key: 'full_score',
+        render: (_, record) => (<InputNumber id={"full_score_input_" + record.key.toString()}/>)
     }, {
-        title: <Text bold={true}>是否计入总分</Text>, dataIndex: 'is_counted', key: 'is_counted'
+        title: <Text bold={true}>是否计入总分</Text>,
+        dataIndex: 'is_counted',
+        key: 'is_counted',
+        render: (_, record) => (<Switch id={"is_counted_switch_" + record.key.toString()} defaultChecked={true}/>)
     }, {
-        title: <Text bold={true}>列号</Text>, dataIndex: 'col_id', key: 'col_id'
+        title: <Text bold={true}>列号</Text>,
+        dataIndex: 'col_id',
+        key: 'col_id',
+        render: (_, record) => (<Input id={"col_id_input_" + record.key.toString()}/>)
     }, {
         title: <Text bold={true}>操作</Text>,
         dataIndex: 'operation',
@@ -259,11 +271,6 @@ export default function DataSourceGenerator() {
 
     function new_subject() {
         const new_data = {
-            "subject_name": <Input id={"subject_name_input_" + data_source_cnt.toString()}/>,
-            "full_score": <InputNumber id={"full_score_input_" + data_source_cnt.toString()}/>,
-            "is_counted": <Switch id={"is_counted_switch_" + data_source_cnt.toString()} defaultChecked={true}/>,
-            "col_id": <Input id={"col_id_input_" + data_source_cnt.toString()}/>,
-            "operation": null,
             "key": data_source_cnt
         };
         set_subject_data_source([...subject_data_source, new_data]);
@@ -368,11 +375,12 @@ export default function DataSourceGenerator() {
                 };
                 for (var i in subject_list) {
                     let now_subject = subject_list[i];
-                    var data="No Data";
-                    try{
+                    var data = "No Data";
+                    try {
                         data = worktable_content[now_subject["col_id"] + now_row.toString()].w;
+                    } catch (e) {
+                        console.log(e);
                     }
-                    catch(e){console.log(e);}
                     if (!re_float.test(data)) {
                         add_log(`考生姓名${now_student.name}，考号${now_student.id}，科目${now_subject.subject_name}，成绩无效。原数据：${data}\n\n`, "del_line");
                         data = -1;
