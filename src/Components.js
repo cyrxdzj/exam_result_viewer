@@ -29,23 +29,30 @@ export function Card(props) {
 export function Page({children}) {
     const thanks_table_data = [{
         "key": "antd",
-        "name": <Text>Ant Design</Text>,
-        "usage": <Text>页面组件设计，如按钮、输入框等。</Text>,
-        "url": <a href={"https://ant.design"} target={"_blank"}
-                  rel={"noreferrer"}><Text>https://ant.design</Text></a>
+        "name": "Ant Design",
+        "usage": "页面组件设计，如按钮、输入框等。",
+        "url": "https://ant.design"
     }, {
         "key": "lxgw",
         "name": <Text>霞鹜文楷</Text>,
         "usage": <Text>页面字体。</Text>,
-        "url": <a href={"https://github.com/lxgw/LxgwWenKai"}
-                  target={"_blank"} rel={"noreferrer"}><Text>https://github.com/lxgw/LxgwWenKai</Text></a>
+        "url": "https://github.com/lxgw/LxgwWenKai"
     }];
     const columns = [{
-        title: <Text bold={true}>名称</Text>, dataIndex: 'name', key: 'name',
+        title: <Text bold={true}>名称</Text>,
+        dataIndex: 'name',
+        key: 'name',
+        render: (_, record) => <Text>{record.name}</Text>,
     }, {
-        title: <Text bold={true}>用途</Text>, dataIndex: 'usage', key: 'usgae',
+        title: <Text bold={true}>用途</Text>,
+        dataIndex: 'usage',
+        key: 'usgae',
+        render: (_, record) => <Text>{record.usage}</Text>,
     }, {
-        title: <Text bold={true}>URL</Text>, dataIndex: 'url', key: 'url'
+        title: <Text bold={true}>URL</Text>,
+        dataIndex: 'url',
+        key: 'url',
+        render: (_, record) => <a href={record.url} target={"_blank"} rel={"noreferrer"}><Text>{record.url}</Text></a>,
     }];
     return (<Background>
         {children}
@@ -56,6 +63,13 @@ export function Page({children}) {
             <Text>以下是ExamResultViewer所使用的部分开源软件，在此表示感谢。</Text>
             <NextLine/>
             <Table dataSource={thanks_table_data} columns={columns} pagination={false}/>
+            <NextLine/>
+            <center>
+                <Text>Powered by <a href={"https://github.com/cyrxdzj/exam_result_viewer"} target={"_blank"}
+                                    rel={"noreferrer"}>ExamResultViewer</a>, by <a
+                    href={"https://space.bilibili.com/673922693?spm_id_from=333.1007.0.0"} target={"_blank"}
+                    rel={"noreferrer"}>cyrxdzj</a>.</Text>
+            </center>
         </Card>
     </Background>);
 }
