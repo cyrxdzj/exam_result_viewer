@@ -76,7 +76,7 @@ export function Page({children}) {
 
 export function Text(props) {
     return (<span style={{
-        "fontSize": text_size[props.type],
+        "fontSize": text_size[props.type?props.type:"normal"],
         "fontFamily": "霞鹜文楷",
         "fontWeight": ((props.type !== undefined && props.type.startsWith("h")) || props.bold) ? "bold" : "normal",
     }} {...props}>{props.children}</span>);

@@ -292,7 +292,7 @@ export default function DataSourceAnalyzer() {
             subject_scores[subject_scores.length - 1] = subject_scores[subject_scores.length - 1].sort(function (a, b) {
                 return b - a;
             });
-            let new_data = null;
+            let new_data;
             if (valid_cnt === 0) {
                 new_data = {
                     "name": "总分",
