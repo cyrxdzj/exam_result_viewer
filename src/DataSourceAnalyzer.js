@@ -74,7 +74,15 @@ export default function DataSourceAnalyzer() {
                     <Text>双击卡片<b>空白部分</b>可以复制卡片为图片，复制到剪贴板里的图片可以使用Ctrl+V快捷键粘贴至微信、Word等软件中。<s>可以将其发送给家长，很有纪念意义，不是吗？</s></Text>
                     <NextLine/>
                     <Input addonBefore={<Text>搜索</Text>} id={"search_input"} placeHolder={"可以根据姓名或考号搜索"}
-                           onChange={handle_personal_data_and_set}/>
+                           onChange={() => {
+                               var search_content_temp = document.getElementById("search_input").value;
+                               setTimeout(() => {
+                                   var search_content_now = document.getElementById("search_input").value;
+                                   if (search_content_now === search_content_temp) {
+                                       handle_personal_data_and_set();
+                                   }
+                               }, 500);
+                           }}/>
                     <NextLine/>
                     {data_personal}
                 </Card>
