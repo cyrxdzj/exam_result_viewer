@@ -142,7 +142,6 @@ export default function DataSourceAnalyzer() {
                 }
                 if (data_list[mid] > data) {
                     left = mid + 1;
-                    ans = mid;
                 } else {
                     right = mid - 1;
                 }
