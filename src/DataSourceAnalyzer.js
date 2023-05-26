@@ -1,6 +1,6 @@
 import {Card, NextLine, Page, PersonalResult, Text} from "./Components";
 import React, {Fragment, useState} from "react";
-import {Button, Input, List, notification, Space, Spin, Switch, Table, Tooltip} from "antd";
+import {Button, Input, List, notification, Select, Space, Spin, Switch, Table, Tooltip} from "antd";
 
 let data_source_content = null;
 let personal_list_data, uncounted_subjects_dom;
@@ -9,6 +9,11 @@ export default function DataSourceAnalyzer() {
     let [data_overview, set_data_overview] = useState(<Fragment/>);
     let [data_personal, set_data_personal] = useState(<Fragment/>);
     let [loading, set_loading] = useState(false);
+    let init_class_options = [{"value": "all", "label": "全部班级"}];
+    let init_sort_options = [{"value": "default_sort", "label": "默认"}, {"value": "sum_score", "label": "总分"}];
+    let [class_options, set_class_options] = useState(init_class_options);
+    let [sort_options, set_sort_options] = useState(init_sort_options);
+    let [filter_and_sorter_visible, set_filter_and_sorter_visible] = useState(false);
     return (<>
         {context_holder}
         <Page>
@@ -37,6 +42,8 @@ export default function DataSourceAnalyzer() {
                         reader.onload = function (e) {
                             data_source_content = JSON.parse(e.target.result);
                             console.log(data_source_content);
+                            set_filter_and_sorter_visible(true);
+                            handle_filter_and_sorter();
                         };
                         reader.readAsText(f, "UTF-8");
                     } catch (e) {
@@ -51,6 +58,23 @@ export default function DataSourceAnalyzer() {
                     <Switch id={"calculate_personal_data"} defaultChecked={true}></Switch>
                     <Text>计算个人数据。关闭它曾经能显著提高速度，但现在不必了。</Text>
                 </Space>
+                <div style={{"display": filter_and_sorter_visible ? "inline" : "none"}}>
+                    <NextLine/>
+                    <Text type={"h2"}>筛选与排序</Text>
+                    <NextLine/>
+                    <Space>
+                        <Text>班级</Text>
+                        <Select defaultValue={"all"} options={class_options}></Select>
+                    </Space>
+                    <NextLine/>
+                    <Space>
+                        <Text>按</Text>
+                        <Select defaultValue={"default_sort"} options={sort_options} style={{"width": "150px"}}/>
+                        <Text>排序，</Text>
+                        <Select defaultValue={"up"}
+                                options={[{"value": "up", "label": "升序"}, {"value": "down", "label": "降序"}]}/>
+                    </Space>
+                </div>
                 <NextLine/>
                 <Button type={"primary"} loading={loading} id={"start_analyze"} onClick={() => {
                     start_loading();
@@ -117,6 +141,32 @@ export default function DataSourceAnalyzer() {
             }
         }
         return data_source_content;
+    }
+
+    function handle_filter_and_sorter() {
+        //处理班级
+        let class_list = [];
+        for (var i in data_source_content.student) {
+            var now_class = data_source_content["student"][i]["class"];
+            if (class_list.indexOf(now_class) === -1) {
+                class_list.push(now_class);
+            }
+        }
+        console.log("Class list:", class_list);
+        let new_class_options = [];
+        for (i in class_list) {
+            new_class_options.push({"value": "class_" + class_list[i], "label": class_list[i]});
+        }
+        set_class_options([...init_class_options, ...new_class_options]);
+        //处理排序方式
+        let new_sort_options = [];
+        for (i in data_source_content["subject"]) {
+            new_sort_options.push({
+                "value": i,
+                "label": data_source_content["subject"][i]["subject_name"] + "单科"
+            });
+        }
+        set_sort_options([...init_sort_options, ...new_sort_options]);
     }
 
     function analyze_data() {
@@ -399,7 +449,6 @@ export default function DataSourceAnalyzer() {
         let search_text = document.getElementById("search_input").value;
         for (var i in personal_list_data) {
             var item = personal_list_data[i];
-            console.log(item);
             if (search_text === "") {
                 new_personal_list_data.push(item);
             } else if (item.name.indexOf(search_text) !== -1) {
