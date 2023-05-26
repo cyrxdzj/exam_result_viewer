@@ -14,6 +14,7 @@ export default function DataSourceAnalyzer() {
     let [class_options, set_class_options] = useState(init_class_options);
     let [sort_options, set_sort_options] = useState(init_sort_options);
     let [filter_and_sorter_visible, set_filter_and_sorter_visible] = useState(false);
+    let filter_class = "all";
     return (<>
         {context_holder}
         <Page>
@@ -64,7 +65,10 @@ export default function DataSourceAnalyzer() {
                     <NextLine/>
                     <Space>
                         <Text>班级</Text>
-                        <Select defaultValue={"all"} options={class_options}></Select>
+                        <Select defaultValue={"all"} options={class_options} id={"filter_class_select"}
+                                style={{"width": "150px"}} onChange={(value) => {
+                            filter_class = value;
+                        }}></Select>
                     </Space>
                     <NextLine/>
                     <Space>
@@ -123,23 +127,33 @@ export default function DataSourceAnalyzer() {
     }
 
 
-    function filtrate_data_source_content(data_source_content) {
+    function filtrate_data_source_content(raw_data_source_content) {
+        console.log("Filter class", filter_class);
+        let data_source_content = JSON.parse(JSON.stringify(raw_data_source_content));
+        console.log("Raw data source content", data_source_content);
         for (var student_id in data_source_content.student) {
-            let now_student = data_source_content.student[student_id];
-            let score = 0, valid = false;
-            for (var j in now_student.score) {
-                let data = now_student.score[j];
-                if (data !== -1 && data_source_content.subject[j].is_counted === "true") {
-                    score += data;
-                    valid = true;
+            if (filter_class === "all" || "class_" + data_source_content.student[student_id]["class"] === filter_class) {
+                let now_student = data_source_content.student[student_id];
+                let score = 0, valid = false;
+                for (var j in now_student.score) {
+                    let data = now_student.score[j];
+                    if (data !== -1 && data_source_content.subject[j].is_counted === "true") {
+                        score += data;
+                        valid = true;
+                    }
                 }
-            }
-            if (valid) {
-                data_source_content.student[student_id].sum_score = score
+                if (valid) {
+                    data_source_content.student[student_id].sum_score = score
+                } else {
+                    data_source_content.student[student_id].sum_score = -1;
+                }
             } else {
-                data_source_content.student[student_id].sum_score = -1;
+                data_source_content.student[student_id] = null;
             }
         }
+        data_source_content.student = data_source_content.student.filter((item) => {
+            return item !== null && typeof item !== "undefined" && item !== "";
+        });
         return data_source_content;
     }
 
@@ -162,8 +176,7 @@ export default function DataSourceAnalyzer() {
         let new_sort_options = [];
         for (i in data_source_content["subject"]) {
             new_sort_options.push({
-                "value": i,
-                "label": data_source_content["subject"][i]["subject_name"] + "单科"
+                "value": i, "label": data_source_content["subject"][i]["subject_name"] + "单科"
             });
         }
         set_sort_options([...init_sort_options, ...new_sort_options]);
@@ -254,7 +267,7 @@ export default function DataSourceAnalyzer() {
                     </Text>
                 </Tooltip>)
         }];
-        var handled_data = filtrate_data_source_content(data_source_content);
+        var handled_data = filtrate_data_source_content({...data_source_content});
         let subject_scores = [];//每一科的所有分数，用于计算排名。
         let uncounted_subjects = [];
         var overview_table_data = [];
@@ -378,6 +391,7 @@ export default function DataSourceAnalyzer() {
             overview_table_data.push(new_data);
         }
         //console.log(overview_table_data);
+        console.log(handled_data);
         set_data_overview(<>
             <Text>共{JSON.stringify(handled_data.student.length)}条数据。</Text>
             <NextLine/>
