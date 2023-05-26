@@ -205,7 +205,6 @@ export default function DataSourceAnalyzer() {
                 }
                 if (data_list[mid] > data) {
                     left = mid + 1;
-                    ans = mid;
                 } else {
                     right = mid - 1;
                 }
@@ -473,7 +472,7 @@ export default function DataSourceAnalyzer() {
         }
         set_data_personal(<List
             pagination={{"position": "bottom", "align": "center", "pageSize": 24, "showQuickJumper": true}}
-            grid={{gutter: 16, column: 4}}
+            grid={{gutter: 16, column: 3}}
             dataSource={new_personal_list_data} renderItem={(item) => (<List.Item>
             <PersonalResult data={item} uncounted_subjects_dom={uncounted_subjects_dom}/>
         </List.Item>)}/>);
