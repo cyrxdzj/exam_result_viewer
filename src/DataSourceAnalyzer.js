@@ -4,6 +4,9 @@ import {Button, Input, List, notification, Select, Space, Spin, Switch, Table, T
 
 let data_source_content = null;
 let personal_list_data, uncounted_subjects_dom;
+let filter_class = "all";
+let sort_key = "default_sort";//排序依据
+let sort_order = "up";//排序顺序，升序or降序
 export default function DataSourceAnalyzer() {
     const [notification_api, context_holder] = notification.useNotification();
     let [data_overview, set_data_overview] = useState(<Fragment/>);
@@ -14,7 +17,7 @@ export default function DataSourceAnalyzer() {
     let [class_options, set_class_options] = useState(init_class_options);
     let [sort_options, set_sort_options] = useState(init_sort_options);
     let [filter_and_sorter_visible, set_filter_and_sorter_visible] = useState(false);
-    let filter_class = "all";
+
     return (<>
         {context_holder}
         <Page>
@@ -73,10 +76,23 @@ export default function DataSourceAnalyzer() {
                     <NextLine/>
                     <Space>
                         <Text>按</Text>
-                        <Select defaultValue={"default_sort"} options={sort_options} style={{"width": "150px"}}/>
+                        <Select id={"sort_key_select"} defaultValue={"default_sort"} options={sort_options}
+                                style={{"width": "150px"}}
+                                onChange={(value) => {
+                                    sort_key = value;
+                                    if (personal_list_data !== null) {
+                                        handle_personal_data_and_set();
+                                    }
+                                }}/>
                         <Text>排序，</Text>
-                        <Select defaultValue={"up"}
-                                options={[{"value": "up", "label": "升序"}, {"value": "down", "label": "降序"}]}/>
+                        <Select id={"sort_order_select"} defaultValue={"up"}
+                                options={[{"value": "up", "label": "升序"}, {"value": "down", "label": "降序"}]}
+                                onChange={(value) => {
+                                    sort_order = value;
+                                    if (personal_list_data !== null) {
+                                        handle_personal_data_and_set();
+                                    }
+                                }}/>
                     </Space>
                 </div>
                 <NextLine/>
@@ -419,6 +435,7 @@ export default function DataSourceAnalyzer() {
             now_personal_data["id"] = now_student.id;
             now_personal_data["class"] = now_student["class"];
             now_personal_data["subject"] = [];
+            now_personal_data["sort_id"] = i;//默认排序ID
             for (var j in handled_data.subject) {
                 now_personal_data["subject"].push({
                     "name": handled_data.subject[j].subject_name,
@@ -469,6 +486,26 @@ export default function DataSourceAnalyzer() {
             } else if (item.id.indexOf(search_text) !== -1) {
                 new_personal_list_data.push(item);
             }
+        }
+        console.log(new_personal_list_data);
+        let sort_order_coe = (sort_order === "up" ? 1 : -1);//排序系数
+        console.log(sort_key, sort_order);
+        if (sort_key === "default_sort") {
+            console.log("Sort as default.");
+            new_personal_list_data = new_personal_list_data.sort((a, b) => {
+                return (a.sort_id - b.sort_id) * sort_order_coe;
+            });
+        } else if (sort_key === "sum_score") {
+            console.log("Sort as sum score.");
+            new_personal_list_data = new_personal_list_data.sort((a, b) => {
+                console.log(a.subject[a.subject.length - 1].score);
+                return (a.subject[a.subject.length - 1].score - b.subject[b.subject.length - 1].score) * sort_order_coe;
+            });
+        } else {
+            console.log("Sort as subject.");
+            new_personal_list_data = new_personal_list_data.sort((a, b) => {
+                return (a.subject[sort_key].score - b.subject[sort_key].score) * sort_order_coe;
+            });
         }
         set_data_personal(<List
             pagination={{"position": "bottom", "align": "center", "pageSize": 24, "showQuickJumper": true}}
